@@ -1,139 +1,91 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Template &middot; Bootstrap</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+<head>
+  <meta charset="utf-8">
+  <title>whatthefuckshouldihaveforlunch?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="What the fuck should I have for lunch?">
+  <meta name="author" content="Tom McKenzie <tom@chillidonut.com>">
+  <link href="css/bootstrap.css" rel="stylesheet">
+  <link href="css/application.css" rel="stylesheet">
+  <link href="css/bootstrap-responsive.css" rel="stylesheet">
 
-    <!-- Le styles -->
-    <link href="../assets/css/bootstrap.css" rel="stylesheet">
-    <style type="text/css">
-      body {
-        padding-top: 20px;
-        padding-bottom: 40px;
-      }
+  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="container-narrow">
 
-      /* Custom container */
-      .container-narrow {
-        margin: 0 auto;
-        max-width: 700px;
-      }
-      .container-narrow > hr {
-        margin: 30px 0;
-      }
+    <div class="masthead">
+      <ul class="nav nav-pills pull-right">
+        <li class="active"><a id="geoStatus" href="index.html">Locating...</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <h3 class="muted">what the fuck should I have for lunch?</h3>
+    </div>
 
-      /* Main marketing message and sign up button */
-      .jumbotron {
-        margin: 60px 0;
-        text-align: center;
-      }
-      .jumbotron h1 {
-        font-size: 72px;
-        line-height: 1;
-      }
-      .jumbotron .btn {
-        font-size: 21px;
-        padding: 14px 24px;
-      }
+    <hr class="pre-map">
 
-      /* Supporting marketing content */
-      .marketing {
-        margin: 60px 0;
-      }
-      .marketing p + h4 {
-        margin-top: 28px;
-      }
-    </style>
-    <link href="../assets/css/bootstrap-responsive.css" rel="stylesheet">
-
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <!-- Fav and touch icons -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
-      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
-                    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
-                                   <link rel="shortcut icon" href="../assets/ico/favicon.png">
-  </head>
-
-  <body>
-
-    <div class="container-narrow">
-
-      <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-        <h3 class="muted">Project name</h3>
-      </div>
-
-      <hr>
-
-      <div class="jumbotron">
-        <h1>Super awesome marketing speak!</h1>
-        <p class="lead">Cras justo odio, dapibus ac facilisis in, egestas eget quam. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-        <a class="btn btn-large btn-success" href="#">Sign up today</a>
-      </div>
-
-      <hr>
-
-      <div class="row-fluid marketing">
-        <div class="span6">
-          <h4>Subheading</h4>
-          <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
-
-          <h4>Subheading</h4>
-          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
-
-          <h4>Subheading</h4>
-          <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
-        </div>
-
-        <div class="span6">
-          <h4>Subheading</h4>
-          <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
-
-          <h4>Subheading</h4>
-          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
-
-          <h4>Subheading</h4>
-          <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+    <div id="map-area">
+      <div id="map-canvas"></div>
+      <div class="jumbotron geoNotReady">
+        <h1>We're locating you now...</h1>
+        <p class="lead notyet">If you don't have geolocation or are heading out, enter a location below:</p>
+        <div class="btn-group notyet">
+          <input type="text" class="btn btn-large input-xxlarge" />
+          <a class="btn btn-large btn-success" href="#">find &raquo;</a>
         </div>
       </div>
+    </div>
 
-      <hr>
+    <hr class="post-map">
 
-      <div class="footer">
-        <p>&copy; Company 2012</p>
+    <div class="row-fluid">
+      <div class="span6">
+        <h4>Why?</h4>
+        <p>
+          I'm sick of having to having to decide for myself what I'm going to get at work, or 
+          when I'm away for a lunch meeting. This solves the problem.
+        </p>
       </div>
 
-    </div> <!-- /container -->
+      <div class="span6">
+        <h4>About</h4>
+        <p>
+          Visit the about page, if one exists yet.
+        </p>
+      </div>
+    </div>
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="../assets/js/jquery.js"></script>
-    <script src="../assets/js/bootstrap-transition.js"></script>
-    <script src="../assets/js/bootstrap-alert.js"></script>
-    <script src="../assets/js/bootstrap-modal.js"></script>
-    <script src="../assets/js/bootstrap-dropdown.js"></script>
-    <script src="../assets/js/bootstrap-scrollspy.js"></script>
-    <script src="../assets/js/bootstrap-tab.js"></script>
-    <script src="../assets/js/bootstrap-tooltip.js"></script>
-    <script src="../assets/js/bootstrap-popover.js"></script>
-    <script src="../assets/js/bootstrap-button.js"></script>
-    <script src="../assets/js/bootstrap-collapse.js"></script>
-    <script src="../assets/js/bootstrap-carousel.js"></script>
-    <script src="../assets/js/bootstrap-typeahead.js"></script>
+    <hr>
 
-  </body>
+    <div class="footer">
+      <p>&copy; 2013</p>
+    </div>
+
+  </div>
+
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&amp;libraries=places&amp;sensor=true"></script>
+
+  <script src="js/zepto.min.js"></script>
+  <script src="js/zepto-fx_methods.js"></script>
+  <script src="js/application.js"></script>
+  <!--
+  <script src="js/jquery-1.9.0.min.js"></script>
+  <script src="js/bootstrap-transition.js"></script>
+  <script src="js/bootstrap-alert.js"></script>
+  <script src="js/bootstrap-modal.js"></script>
+  <script src="js/bootstrap-dropdown.js"></script>
+  <script src="js/bootstrap-scrollspy.js"></script>
+  <script src="js/bootstrap-tab.js"></script>
+  <script src="js/bootstrap-tooltip.js"></script>
+  <script src="js/bootstrap-popover.js"></script>
+  <script src="js/bootstrap-button.js"></script>
+  <script src="js/bootstrap-collapse.js"></script>
+  <script src="js/bootstrap-carousel.js"></script>
+  <script src="js/bootstrap-typeahead.js"></script>
+  -->
+</body>
 </html>
-
