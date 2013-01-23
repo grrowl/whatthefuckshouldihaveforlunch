@@ -67,8 +67,28 @@
 
   </div>
 
+  <script id="placeInfo-template" type="text/x-handlebars-template">
+    <div class="placeInfo">
+      <img class="placeType" src="{{icon}}" />
+      <h2>{{name}}</h2>
+      <p>At: {{vicinity}}</p>
+      <p>Rating: {{rating}}</p>
+      {{#if opening_hours.open_now}}
+        <p>Open now!</p>
+      {{/if}}
+    </div>
+  </script>
+  <script id="placeList-template" type="text/x-handlebars-template">
+    <ul>
+    {{#each places}}
+      <li>{{this.name}}</li>
+    {{/each}}
+    </ul>
+  </script>
+
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&amp;libraries=places&amp;sensor=true"></script>
 
+  <script src="js/handlebars.js"></script>
   <script src="js/zepto.min.js"></script>
   <script src="js/zepto-fx_methods.js"></script>
   <script src="js/application.js"></script>
