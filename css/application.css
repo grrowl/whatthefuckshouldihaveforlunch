@@ -22,21 +22,25 @@ body {
   margin: 30px 0;
 }
 
-/* Main marketing message and sign up button */
+
+h1 {
+  font-size: 24px;
+}
+
 .jumbotron {
   margin: 60px 0;
   text-align: center;
 }
-.jumbotron h1 {
+.jumbotron h2 {
   font-size: 72px;
   line-height: 1;
 }
-.jumbotron .btn {
+
+#manual-location .btn {
   font-size: 21px;
   padding: 14px 24px;
 }
-
-input.btn-large {
+#manual-location input.btn-large {
   text-align: left;
   vertical-align: top;
 }
@@ -75,7 +79,7 @@ hr.post-map {
   position: relative;
   margin: 0;
   padding: 110px 0;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 /* map infowindow */
@@ -86,6 +90,10 @@ hr.post-map {
 
 #places-list thead {
   /*display: none;*/
+}
+#places-list .info {
+  text-align: right;
+  white-space: nowrap;
 }
 #places-list .no-results {
   font-weight: italic;

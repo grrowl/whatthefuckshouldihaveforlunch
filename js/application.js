@@ -1,102 +1,120 @@
-var wtfl = {
+var Lunch = {
   place_types: [
-    ['bakery', 'cafe', 'food', 'meal_takeaway', 'restaurant', 'meal_delivery'],
-    ['bar', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
+    ['bakery', 'cafe', 'meal_takeaway', 'restaurant', 'meal_delivery'],
+    ['bar', 'food', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
     ['casino', 'liquor_store', 'night_club']
   ],
 
   map: undefined,
   location: undefined,
   places: [],
+  markers: [],
 
   infoWindow: undefined,
 
   // start app
   init: function () {
-    console.log('app ready');
-    wtfl.mapsReady();
+    UI.init();
+    Lunch.geoInit();
     Templates.init();
   },
 
-  // show and hide front-end elements as services become available
-  isReady: function (type) {
-    $('.'+ type +'NotReady').fadeOut(600, function (a) {
-      $('.'+ type +'NotReady').remove();
-      $('.'+ type +'Ready').fadeIn();
-    });
-  },
-
   // google maps api is ready!
-  mapsReady: function () {
-    wtfl.isReady('maps');
+  mapInit: function () {
+    UI.isReady('map');
+
+    latLng = Lunch.location || new google.maps.LatLng(-37.80544, 144.98331);
 
     var mapOptions = {
-      center: new google.maps.LatLng(-37.80544, 144.98331),
+      center: latLng,
       zoom: 15,
       minZoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
+    Lunch.map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
 
-    wtfl.map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+    google.maps.event.addListener(Lunch.map, 'click', Lunch.hideInfo );
 
-    // google.maps.event.addListener(wtfl.map, 'bounds_changed', wtfl.hideInfo );
-    // google.maps.event.addListener(wtfl.map, 'center_changed', wtfl.hideInfo );
-    google.maps.event.addListener(wtfl.map, 'click', wtfl.hideInfo );
+    Lunch.geoInit();
+  },
 
+  // reset map location and contents
+  mapUpdate: function (location) {
+    var firstMap = (Lunch.map === undefined);
+    if (firstMap)
+      Lunch.mapInit();
+
+    location = location || Lunch.location; 
+
+    if (firstMap)
+      Lunch.map.setCenter(location);
+    else
+      Lunch.map.panTo(location);
+    // Lunch.map.setZoom(16);
+
+    Lunch.loadPlaces();
+  },
+
+  // start geolocation services
+  geoInit: function () {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        wtfl.geoCallback, 
+      navigator.geolocation.getCurrentPosition(function (pos) {
+          UI.isReady('geo');
+          $('#geoStatus').text('Located');
+
+          Lunch.geoCallback(pos);
+        }, 
         function() {
           $('#geoStatus').text('Not found');
         }
       );      
     } else {
-      $('#geoStatus').text('No geoservices');
+      $('#geoStatus').text('');
     }
   },
 
   // geolocation is set!
   geoCallback: function (pos) {
-    wtfl.isReady('geo');
-    $('#geoStatus').text('Located');
-
-    wtfl.location = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+    Lunch.location = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+    Lunch.mapUpdate();
 
     var infowindow = new google.maps.Marker({
-      map: wtfl.map,
-      position: wtfl.location,
+      map: Lunch.map,
+      position: Lunch.location,
       title: 'My position'
     });
-
-    wtfl.map.setCenter(wtfl.location);
-    wtfl.map.setZoom(16);
-
-    wtfl.loadPlaces();
   },
 
   // load 'places' from google
   loadPlaces: function (query) {
-    service = new google.maps.places.PlacesService(wtfl.map);
+    service = new google.maps.places.PlacesService(Lunch.map);
     service.nearbySearch({
-      location: wtfl.location,
-      radius: 500,
+      location: Lunch.location,
+      // radius: 500,
       keyword: query,
-      rankBy: google.maps.places.RankBy.PROMINENCE,
-      types: wtfl.place_types[0]
+      rankBy: google.maps.places.RankBy.DISTANCE,
+      types: Lunch.place_types[0]
     }, 
     function (results, status) {
-      console.log('places callback:', results, status);
-
-      wtfl.places = $.extend(wtfl.places, results);
-
-      console.log(wtfl.places, results);
-
-      var marker;
+      var marker, exists;
 
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         for (var i = 0; i < results.length; i++) {
+          // search for this point in our local cache
+          exists = false;
+          for (var j = 0; j < Lunch.places.length; j++) {
+            if (Lunch.places[j].id === results[i].id) {
+              exists = true;
+              break; // this place exists, bail
+            }
+          }
+          if (exists) break;
+
+          console.log('New place:', results[i]);
+          Lunch.places.push(results[i]);
+
           marker = new google.maps.Marker({
-            map: wtfl.map,
+            map: Lunch.map,
             animation: google.maps.Animation.DROP,
 
             position: results[i].geometry.location,
@@ -104,35 +122,33 @@ var wtfl = {
             place: results[i]
           });
 
-          google.maps.event.addListener(marker, 'click', wtfl.showInfo );
+          Lunch.markers.push(marker);
+
+          google.maps.event.addListener(marker, 'click', Lunch.showInfo );
         }
-      }      
+      }
 
-      setTimeout(wtfl.listPlaces, 450);
+      setTimeout(UI.placesListUpdate, 450);
     });
-  },
-
-  listPlaces: function () {
-    $('#places-list tbody').html(Templates.placeList({ places: wtfl.places }));
   },
 
   showInfo: function (pos) {
     console.log('showInfo', this, pos);
     var place = this.place;
 
-    if (wtfl.infoWindow === undefined) 
-      wtfl.infoWindow = new google.maps.InfoWindow();
+    if (Lunch.infoWindow === undefined) 
+      Lunch.infoWindow = new google.maps.InfoWindow();
 
     var html = Templates.placeInfo(place);
 
-    wtfl.infoWindow.setContent(html);
-    wtfl.infoWindow.setPosition(pos.latLng);
-    wtfl.infoWindow.open(wtfl.map);
+    Lunch.infoWindow.setContent(html);
+    Lunch.infoWindow.setPosition(pos.latLng);
+    Lunch.infoWindow.open(Lunch.map);
   },
 
   hideInfo: function () {
-    if (wtfl.infoWindow !== undefined)
-      wtfl.infoWindow.close();
+    if (Lunch.infoWindow !== undefined)
+      Lunch.infoWindow.close();
   }
 }
 
@@ -152,6 +168,56 @@ var Templates = {
   }
 }
 
+var UI = {
+  init: function () {
+    UI.placesListInit();
+  },
 
-$(wtfl.init);
-// $(document).on('load', wtfl.mapsInit);
+  // show and hide front-end elements as services become available
+  isReady: function (type) {
+    $('.'+ type +'NotReady').fadeOut(600, function (a) {
+      if (type == 'map')
+        $('#manual-location').insertAfter($('#places-list'));
+
+      $('.'+ type +'NotReady').remove();
+      $('.'+ type +'Ready').fadeIn();
+    });
+
+    // special handling for specific types
+    switch (type) {
+      case 'geo': break;
+      case 'map': break;
+    }
+  },
+
+  // 
+  placesListInit: function () {
+    // focus 
+    $('#places-list').on('click', 'tbody tr', function (ev) {
+      var $this = $(this), latLng;
+
+      latLng = Lunch.places[$this.data('index')].geometry.location;
+      Lunch.mapUpdate(latLng);
+    });
+  },
+
+  // 
+  placesListUpdate: function () {
+    $('#places-list tbody')
+      .html(Templates.placeList({ places: Lunch.places }));
+  }
+}
+
+Handlebars.registerHelper('distanceTo', function (latLng) {
+  if (!Lunch.location)
+    return '';
+
+  var distance = google.maps.geometry.spherical.computeDistanceBetween(
+    latLng, Lunch.location
+  );
+  distance = ~~(distance * 0.1) * 0.01;
+  return distance + ' km away';
+});
+
+$(Lunch.init);
+// $(document).on('load', Lunch.mapsInit);

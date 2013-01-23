@@ -20,10 +20,14 @@
 
     <div class="masthead">
       <ul class="nav nav-pills pull-right">
-        <li class="active"><a id="geoStatus" href="index.html">Locating...</a></li>
-        <li><a href="about.html">About</a></li>
+        <li>
+          <a><i class="icon-map-marker"></i></a>
+        </li>
+        <li id="geoStatus">
+          <a>Locating...</a>
+        </li>
       </ul>
-      <h3 class="muted">what the fuck should I have for lunch?</h3>
+      <h1>what the fuck should I have for lunch?</h1>
     </div>
 
     <hr class="pre-map">
@@ -31,11 +35,13 @@
     <div id="map-area">
       <div id="map-canvas"></div>
       <div class="jumbotron geoNotReady">
-        <h1>We're locating you now...</h1>
-        <p class="lead notyet">If you don't have geolocation or are heading out, enter a location below:</p>
-        <div class="btn-group notyet">
-          <input type="text" class="btn btn-large input-xxlarge" />
-          <a class="btn btn-large btn-success" href="#">find &raquo;</a>
+        <h2>We're locating you now...</h2>
+        <div id="manual-location">
+          <p class="lead">If you don't have geolocation or are heading out, enter a location below:</p>
+          <div class="btn-group">
+            <input type="text" class="btn btn-large input-xxlarge" />
+            <a class="btn btn-large btn-success" href="#">find &raquo;</a>
+          </div>
         </div>
       </div>
     </div>
@@ -45,12 +51,19 @@
     <table class="table table-striped table-condensed" id="places-list">
       <thead>
         <tr>
-          <td>Name</td>
-          <td>Where</td>
-          <td>Info</td>
+          <th>Name</th>
+          <th>Where</th>
+          <th class="info">Info</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <tr>
+          <td colspan="3">
+            <i class="icon-map-marker"></i> 
+            Waiting on location so you can fucking eat...
+          </td>
+        </tr>
+      </tbody>
     </table>
 
     <div class="row-fluid">
@@ -84,7 +97,7 @@
       <h2>{{name}}</h2>
       <p>At: {{vicinity}}</p>
       {{#if rating}}
-        <p>Rating: {{rating}}</p>
+        <p>{{rating}} <i class="icon-star"></i></p>
       {{/if}}
       {{#if opening_hours.open_now}}
         <p>Open now!</p>
@@ -93,12 +106,17 @@
   </script>
   <script id="placeList-template" type="text/x-handlebars-template">
     {{#each places}}
-    <tr>
+    <tr data-index="{{@index}}">
       <td>{{this.name}}</td>
-      <td>{{this.vicinity}}</td>
       <td>
+        {{this.vicinity}}
+        <small class="muted">
+          {{distanceTo this.geometry.location}}
+        </small>
+      </td>
+      <td class="info">
         {{#if this.rating}}
-          <div>Rating: {{this.rating}}</div>
+          <div>{{this.rating}} <i class="icon-star"></i></div>
         {{/if}}
         {{#if this.opening_hours.open_now}}
           <div>Open now!</div>
@@ -116,7 +134,7 @@
     
   </script>
 
-  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&amp;libraries=places&amp;sensor=true"></script>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&amp;libraries=places,geometry&amp;sensor=true"></script>
 
   <script src="js/handlebars.js"></script>
   <script src="js/zepto.min.js"></script>
