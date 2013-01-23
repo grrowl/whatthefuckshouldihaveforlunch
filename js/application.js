@@ -85,6 +85,20 @@ var Lunch = {
     });
   },
 
+  // set location from string
+  locationFromString: function (locationString) {
+    var service = new google.maps.Geocoder();
+    service.geocode({
+      address: locationString,
+      region: 'au' // prefer Australia for now
+    }, function (results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        Lunch.location = results[0].geometry.location;
+        Lunch.mapUpdate();
+      }
+    });
+  },
+
   // load 'places' from google
   loadPlaces: function (query) {
     service = new google.maps.places.PlacesService(Lunch.map);
@@ -110,7 +124,7 @@ var Lunch = {
           }
           if (exists) break;
 
-          console.log('New place:', results[i]);
+          // console.log('New place:', results[i]);
           Lunch.places.push(results[i]);
 
           marker = new google.maps.Marker({
@@ -171,12 +185,17 @@ var Templates = {
 var UI = {
   init: function () {
     UI.placesListInit();
+
+    $('#manual-location input').on('keypress', function (ev) {
+      if (ev.which == 13) UI.handleLocationSubmit(ev);
+    });
+    $('#manual-location a').on('click', UI.handleLocationSubmit);
   },
 
   // show and hide front-end elements as services become available
   isReady: function (type) {
     $('.'+ type +'NotReady').fadeOut(600, function (a) {
-      if (type == 'map')
+      if (type == 'geo')
         $('#manual-location').insertAfter($('#places-list'));
 
       $('.'+ type +'NotReady').remove();
@@ -205,6 +224,12 @@ var UI = {
   placesListUpdate: function () {
     $('#places-list tbody')
       .html(Templates.placeList({ places: Lunch.places }));
+  },
+
+  handleLocationSubmit: function (ev) {
+    var location = $('#manual-location input').val();
+    if (location.length)
+      Lunch.locationFromString(location);
   }
 }
 
