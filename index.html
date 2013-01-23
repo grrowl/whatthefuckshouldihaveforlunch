@@ -42,6 +42,17 @@
 
     <hr class="post-map">
 
+    <table class="table table-striped table-condensed" id="places-list">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td>Where</td>
+          <td>Info</td>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
     <div class="row-fluid">
       <div class="span6">
         <h4>Why?</h4>
@@ -68,22 +79,41 @@
   </div>
 
   <script id="placeInfo-template" type="text/x-handlebars-template">
-    <div class="placeInfo">
-      <img class="placeType" src="{{icon}}" />
+    <div class="place-info">
+      <img class="place-type" src="{{icon}}" />
       <h2>{{name}}</h2>
       <p>At: {{vicinity}}</p>
-      <p>Rating: {{rating}}</p>
+      {{#if rating}}
+        <p>Rating: {{rating}}</p>
+      {{/if}}
       {{#if opening_hours.open_now}}
         <p>Open now!</p>
       {{/if}}
     </div>
   </script>
   <script id="placeList-template" type="text/x-handlebars-template">
-    <ul>
     {{#each places}}
-      <li>{{this.name}}</li>
+    <tr>
+      <td>{{this.name}}</td>
+      <td>{{this.vicinity}}</td>
+      <td>
+        {{#if this.rating}}
+          <div>Rating: {{this.rating}}</div>
+        {{/if}}
+        {{#if this.opening_hours.open_now}}
+          <div>Open now!</div>
+        {{/if}}
+      </td>
+    </tr>
     {{/each}}
-    </ul>
+    {{#unless places}}
+    <tr>
+      <td class="muted no-results" colspan="3">
+        No soup for you! (sorry)
+      </td>
+    </tr>
+    {{/unless}}
+    
   </script>
 
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&amp;libraries=places&amp;sensor=true"></script>

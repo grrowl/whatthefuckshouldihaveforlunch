@@ -87,7 +87,9 @@ var wtfl = {
     function (results, status) {
       console.log('places callback:', results, status);
 
-      wtfl.places = $(true, results);
+      wtfl.places = $.extend(wtfl.places, results);
+
+      console.log(wtfl.places, results);
 
       var marker;
 
@@ -105,7 +107,13 @@ var wtfl = {
           google.maps.event.addListener(marker, 'click', wtfl.showInfo );
         }
       }      
+
+      setTimeout(wtfl.listPlaces, 450);
     });
+  },
+
+  listPlaces: function () {
+    $('#places-list tbody').html(Templates.placeList({ places: wtfl.places }));
   },
 
   showInfo: function (pos) {
@@ -131,6 +139,8 @@ var wtfl = {
 var Templates = {
   init: function () {
     var self = this;
+    console.time('Compiling templates');
+
     $('script[type="text/x-handlebars-template"]').each(function (i) {
       var $this = $(this),
           id = $this.attr('id').split('-').shift();
@@ -138,7 +148,7 @@ var Templates = {
       self[id] = Handlebars.compile($this.html());
     });
 
-    console.log('templates compiled', self);
+    console.timeEnd('Compiling templates');
   }
 }
 

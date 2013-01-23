@@ -79,7 +79,14 @@ hr.post-map {
 }
 
 /* map infowindow */
-.placeInfo {}
-.placeInfo img.placeType {
+.place-info {}
+.place-info img.place-type {
   float: left;
+}
+
+#places-list thead {
+  /*display: none;*/
+}
+#places-list .no-results {
+  font-weight: italic;
 }
