@@ -11,6 +11,8 @@ var Lunch = {
   places: [],
   markers: [],
 
+  locationPlaces: {}, // object map of placeindex => distance. reset on setLocation
+
   locationMarker: undefined,
   infoWindow: undefined,
 
@@ -39,6 +41,7 @@ var Lunch = {
     };
     Lunch.map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
 
+    google.maps.event.addListener(Lunch.map, 'bounds_changed', UI.placesListUpdate );
     google.maps.event.addListener(Lunch.map, 'click', Lunch.hideInfo );
 
     Lunch.geoInit();
@@ -114,6 +117,7 @@ var Lunch = {
     onionLayer.assertReady('map');
     Lunch.isReady('location');
 
+    Lunch.locationPlaces = {}; // reset distance map
     Lunch.location = latLng;
     Lunch.mapUpdate();
 
@@ -153,12 +157,20 @@ var Lunch = {
 
           for (var j = 0; j < Lunch.places.length; j++) {
             if (Lunch.places[j].id === place.id) {
-              exists = true;
+              exists = j;
               break; // this place exists, bail
             }
           }
-          if (exists) break;
-          Lunch.places.push(place);
+          if (exists !== false) {
+            // add to locationplaces
+            Lunch.locationPlaces[exists] = Lunch.distanceTo(place.geometry.location);
+            break;
+
+          } else {
+            // add to places cache and locationplaces
+            place.index = Lunch.places.length;
+            Lunch.locationPlaces[Lunch.places.push(place) - 1] = Lunch.distanceTo(place.geometry.location);
+          }
 
           marker = new google.maps.Marker({
             map: Lunch.map,
@@ -176,11 +188,41 @@ var Lunch = {
         }
       }
 
+      Lunch.zoomToLocationPlaces();
       setTimeout(UI.placesListUpdate, 450);
     });
   },
 
-  // show an info bubble
+  // calculates distance to current location
+  // REQUIRES map -- shouldn't get called from anywhere else
+  distanceTo: function(latLng) {
+    onionLayer.assertReady('location');
+
+    return google.maps.geometry.spherical.computeDistanceBetween(
+      latLng, Lunch.location
+    );
+  },
+
+  // zooms to this location's places
+  zoomToLocationPlaces: function () {
+    if (Lunch.locationPlaces.length === 0) return false;
+
+    var bounds = new google.maps.LatLngBounds(),
+        placeIndex;
+
+    for (placeIndex in Lunch.locationPlaces) {
+      bounds.extend(Lunch.places[placeIndex].geometry.location);
+    }
+    if (bounds)
+      Lunch.map.fitBounds(bounds);
+  },
+
+  // shows an info bubble for a particlar map
+  showPlaceInfo: function (place) {
+    Lunch.showInfo.call({ place: place }, { latLng: place.geometry.location });
+  },
+
+  // show an info bubble, event handler for marker.click
   // REQUIRES map
   showInfo: function (pos) {
     onionLayer.assertReady('map');
@@ -227,6 +269,7 @@ var UI = {
   init: function () {
     UI.placesListInit();
 
+    // manual-location
     $('#manual-location input').on('keypress', function (ev) {
       if (ev.which == 13) UI.handleLocationSubmit(ev);
     });
@@ -250,16 +293,36 @@ var UI = {
       $('#places-list').on('click', 'tbody tr', function (ev) {
         var $this = $(this), latLng;
 
-        latLng = Lunch.places[$this.data('index')].geometry.location;
-        Lunch.mapUpdate(latLng);
+        // latLng = Lunch.places[$this.data('index')].geometry.location;
+
+        Lunch.showPlaceInfo(Lunch.places[$this.data('index')]);
+        // Lunch.mapUpdate(latLng);
       });
     });
   },
 
-  // 
+  // updates the #places-list with relevant points
   placesListUpdate: function () {
+    onionLayer.assertReady('map');
+
+    // get map bounds, populate new array of places that are inside bounds, then sort by distance.
+    var mapBounds = Lunch.map.getBounds(),
+        places = [], placeIndexes = [], i;
+    for (i = 0; i < Lunch.places.length; i++ ) {
+      if (mapBounds.contains(Lunch.places[i].geometry.location)) {
+        // places.push(Lunch.places[i]);
+        placeIndexes.push(i);
+      }
+    }
+    placeIndexes.sort(function (a, b){
+      return (Lunch.locationPlaces[a] > Lunch.locationPlaces[b]) ? 1 : -1;
+    });
+    for (i = 0; i < placeIndexes.length; i++) {
+      places.push(Lunch.places[placeIndexes[i]]);
+    }
+
     $('#places-list tbody')
-      .html(Templates.placeList({ places: Lunch.places }));
+      .html(Templates.placeList({ places: places }));
   },
 
   handleLocationSubmit: function (ev) {
@@ -308,9 +371,7 @@ Handlebars.registerHelper('distanceTo', function (latLng) {
   if (!Lunch.location)
     return '';
 
-  var distance = google.maps.geometry.spherical.computeDistanceBetween(
-    latLng, Lunch.location
-  );
+  var distance = Lunch.distanceTo(latLng);
   distance = ~~(distance * 0.1) * 0.01;
   return distance + ' km away';
 });

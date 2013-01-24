@@ -4,19 +4,22 @@ solving the age-old question with maps and science
 ## app layout
 - **Lunch**: core app functionality
 - **UI**: handles most UI binding, handling
-- **onionLayer*: ensures code doesn't execute before dependent services are ready
+- **onionLayer**: ensures code doesn't execute before dependent services are ready
 
-### todo
+## todo
 - better UI feedback: loading (blocked), done (success), error.
   - Places: <https://developers.google.com/maps/documentation/javascript/places#place_search_responses>
-  - Geocoder: <https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingStatusCodes>
-- there should only ever be one 'your location' marker
-- do both a "nearest" and "most relevant" search, add all results.
+- do both a "nearest" and "most relevant" search, merge results.
 
 - map improvements
-  - dont do this: <http://joe.kueser.com/2010/03/pan-and-zoom-to-include-all-markers-in-google-maps-v3/>, just chuck em all into a 
   - small tooltip on marker hover
-  - `places-list` should only list points visible within viewport
-  - better icons: 'your location'
 
-### known bugs
+## performance bottlenecks
+- we recalculate distance between location and points often
+  - every time we re-add a place to locationPlaces (reset every call to setLocation)
+- if desperate,
+  - more aggressive object caching, `new google.maps.anything` overhead
+  - investigate overhead of all the onionLayer calls
+- not performance, but will eventually need to rewrite the for and for..in statements in a friendlier way ($.each)
+
+## known bugs
