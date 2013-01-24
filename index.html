@@ -38,6 +38,8 @@
 
     <hr class="pre-map">
 
+    <div id="lunch-suggestion"></div>
+
     <div id="map-area">
       <div id="map-canvas"></div>
       <div class="jumbotron locationNotReady">
@@ -144,9 +146,53 @@
       </td>
     </tr>
     {{/unless}}
-    
   </script>
 
+  <script id="lunchSuggestion-template" type="text/x-handlebars-template">
+    {{#if this}}
+      {{#if photos}}
+      <div id="suggest-carousel" class="carousel slide">
+        <div class="carousel-inner">
+        {{#each photos}}
+          <div class="item{{#ifEq @index 0}} active{{/ifEq}}">
+            <img src="{{this.raw_reference.fife_url}}" />
+          </div>
+        {{/each}}
+        </div>
+      </div>
+      {{/if}}
+      <a class="close">&times;</a>
+      <img class="place-type" src="{{icon}}" />
+      <h2>{{name}}</h2>
+      <h5>{{vicinity}}</h5>
+      <ul class="inline">
+        <li>
+          This is a:
+          {{#each types}}{{#ifNotEq @index 0}}, {{/ifNotEq}}
+            {{this}}{{/each}}.
+        </li>
+        {{#if rating}}
+          <li>{{rating}} <i class="icon-star"></i></li>
+        {{/if}}
+        <li>
+          Find on
+          <a href="http://www.yelp.com.au/search?find_desc={{encode name}}" target="_blank" class="btn btn-mini">
+            Yelp</a>
+          <a href="https://maps.google.com/maps?q={{encode vicinity}}" target="_blank" class="btn btn-mini">
+            Maps</a>
+        </li>
+      </ul>
+      {{#if opening_hours}}
+      
+      {{/if}}
+    {{/if}}
+    {{#unless this}}
+      <div class="alert">
+        <h4>No lunch today!</h4>
+        Try relaxing your search terms, or quit telecommunitng from Hoboken
+      </div>
+    {{/unless}}
+  </script>
 
   <script src="js/handlebars.js"></script>
   <script src="js/zepto.min.js"></script>

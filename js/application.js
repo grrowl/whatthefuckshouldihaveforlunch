@@ -1,7 +1,7 @@
 var Lunch = {
   place_types: [
-    ['bakery', 'cafe', 'meal_takeaway', 'restaurant', 'meal_delivery'],
-    ['bar', 'food', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
+    ['bakery', 'cafe', 'meal_takeaway', 'restaurant', 'bar', 'meal_delivery'],
+    ['food', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
     ['casino', 'liquor_store', 'night_club']
   ],
   default_location: [-37.80544, 144.98331], // collingwood
@@ -150,7 +150,7 @@ var Lunch = {
 
     service.nearbySearch({
       location: Lunch.location,
-      radius: 750 ,
+      radius: 750,
       keyword: query,
       rankBy: google.maps.places.RankBy.PROMINENCE,
       types: Lunch.place_types[0]
@@ -159,6 +159,8 @@ var Lunch = {
 
   // handles a google place search reply
   placesLoadHander: function (results, status) {
+    onionLayer.isReady('places');
+
     var marker, exists, place;
 
     if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -257,6 +259,23 @@ var Lunch = {
   hideInfo: function () {
     if (Lunch.infoWindow !== undefined)
       Lunch.infoWindow.close();
+  },
+
+  // return random place near location
+  randomPlace: function () {
+    // http://stackoverflow.com/a/2532251/894361 : trusting this till vertified
+    function pickRandomProperty(obj) {
+        var result;
+        var count = 0;
+        for (var prop in obj)
+            if (Math.random() < 1/++count)
+               result = prop;
+        return result;
+    }
+
+    var index = pickRandomProperty(Lunch.locationPlaces);
+    if (index !== undefined)
+      return Lunch.places[index];
   }
 }
 
@@ -280,6 +299,15 @@ var UI = {
   init: function () {
     UI.placesListInit();
 
+    onionLayer.call('places', function () {
+      $('h1').on('click', UI.suggestLunch)
+        .html('<a class="btn btn-large">'+ $('h1').text() +'</a>');
+        
+      $('#lunch-suggestion').on('click', '.close', function () {
+        $(this).parents('#lunch-suggestion').empty();
+      });
+    });
+
     // manual-location
     $('#manual-location input').on('keypress', function (ev) {
       if (ev.which == 13) UI.handleLocationSubmit(ev);
@@ -291,7 +319,7 @@ var UI = {
   isReady: function (type) {
     $('.'+ type +'NotReady').fadeOut(600, function (a) {
       if (type == 'location')
-        $('#manual-location').insertBefore($('#places-list'));
+        $('#manual-location').insertAfter($('#map-area'));
 
       $('.'+ type +'NotReady').remove();
       $('.'+ type +'Ready').fadeIn();
@@ -340,6 +368,17 @@ var UI = {
     var location = $('#manual-location input').val();
     if (location.length)
       Lunch.locationFromString(location);
+  },
+
+  suggestLunch: function () {
+    var suggestion = $('#lunch-suggestion');
+    
+    // pick random lunch
+    var place = Lunch.randomPlace();
+
+    suggestion.html(Templates.lunchSuggestion(place));
+    if (place)
+      Lunch.showPlaceInfo(place);
   }
 }
 
@@ -382,13 +421,32 @@ var onionLayer = {
   }
 }
 
+
+// handlebars helpers
+
 Handlebars.registerHelper('distanceTo', function (latLng) {
-  if (!Lunch.location)
-    return '';
+  if (!Lunch.location) return '';
 
   var distance = Lunch.distanceTo(latLng);
   distance = ~~(distance * 0.1) * 0.01;
   return distance + ' km away';
+});
+
+Handlebars.registerHelper('encode', function (unescaped) {
+  return encodeURIComponent(unescaped);
+});
+
+Handlebars.registerHelper('ifEq', function(v1, v2, options) {
+  if(v1 == v2) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
+});
+Handlebars.registerHelper('ifNotEq', function(v1, v2, options) {
+  if(v1 != v2) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
 });
 
 $(Lunch.init);

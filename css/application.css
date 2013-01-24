@@ -38,6 +38,10 @@ h1 {
 
 #manual-location {
   text-align: center;
+  padding-top: 10px;
+}
+#manual-location .lead {
+  margin-bottom: 10px;
 }
 #manual-location .btn {
   font-size: 21px;
@@ -97,9 +101,8 @@ hr.post-map {
   margin-left: 47px;
 }
 
-#places-list {
-  padding-top: 20px;
-}
+/* places table list */
+#places-list {}
 #places-list thead {
   /*display: none;*/
 }
@@ -112,4 +115,25 @@ hr.post-map {
 }
 #places-list .no-results {
   font-weight: italic;
+}
+
+/* lunch suggestion */
+#lunch-suggestion {
+  position: relative;
+}
+#lunch-suggestion .close {
+  padding-right: 10px;
+/*  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 12;
+*/}
+#lunch-suggestion .carousel {
+  width: 150px;
+  float: right;
+}
+#lunch-suggestion .place-type {
+  max-width: 60px;
+  float: left;
+  margin: 4px 12px 0 0;
 }
