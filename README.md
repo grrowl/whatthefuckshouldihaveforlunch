@@ -8,8 +8,6 @@ solving the age-old question with maps and science
 - **onionLayer**: ensures code doesn't execute before dependent services are ready
 
 ## todo
-- place the markers nicely (setTimeout 200*index)
-
 - better UI feedback: loading (blocked), done (success), error.
   - Places: <https://developers.google.com/maps/documentation/javascript/places#place_search_responses>
   - contextual error messages: probably dump in `#lunch-suggestion` with a close button, one at a time
