@@ -61,7 +61,7 @@ hr.pre-map {
 }
 hr.post-map {
   margin-top: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 #map-area {
@@ -89,7 +89,12 @@ hr.post-map {
 /* map infowindow */
 .place-info {}
 .place-info img.place-type {
+  max-width: 35px;
   float: left;
+  margin: 4px 12px 0 0;
+}
+.place-info h2 {
+  margin-left: 47px;
 }
 
 #places-list {
@@ -97,6 +102,9 @@ hr.post-map {
 }
 #places-list thead {
   /*display: none;*/
+}
+#places-list tbody tr {
+  cursor: pointer;
 }
 #places-list .info {
   text-align: right;

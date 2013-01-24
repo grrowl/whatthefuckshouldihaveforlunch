@@ -229,8 +229,8 @@ var Lunch = {
 
     var place = this.place;
 
-    if (Lunch.infoWindow === undefined) 
-      Lunch.infoWindow = new google.maps.InfoWindow();
+    if (Lunch.infoWindow === undefined)
+      Lunch.infoWindow = new google.maps.InfoWindow({ maxWidth: 500 });
     else
       Lunch.infoWindow.close();
 
@@ -279,7 +279,7 @@ var UI = {
   // show and hide front-end elements as services become available
   isReady: function (type) {
     $('.'+ type +'NotReady').fadeOut(600, function (a) {
-      if (type == 'geo')
+      if (type == 'location')
         $('#manual-location').insertBefore($('#places-list'));
 
       $('.'+ type +'NotReady').remove();
