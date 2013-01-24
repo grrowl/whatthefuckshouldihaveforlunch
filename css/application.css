@@ -75,6 +75,9 @@ hr.post-map {
   background: url('../img/collingwood-700x490.png') top left repeat;
   /*background-image: url('//maps.googleapis.com/maps/api/staticmap?center=48%20Cambridge%20Street,VIC&zoom=15&size=700x490&key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&sensor=false');*/
 }
+#map-area img {
+    max-width: none;
+}
 #map-canvas {
   position: absolute;
   top: 0;

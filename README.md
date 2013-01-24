@@ -8,16 +8,17 @@ solving the age-old question with maps and science
 - **onionLayer**: ensures code doesn't execute before dependent services are ready
 
 ## todo
-- lol: actually suggesting what the fuck you should have for lunch
+- place the markers nicely (setTimeout 200*index)
+
 - better UI feedback: loading (blocked), done (success), error.
   - Places: <https://developers.google.com/maps/documentation/javascript/places#place_search_responses>
-  - need to figure out how to display contextual error messages
-- do both a "nearest" and "most relevant" search, merge results.
-
+  - contextual error messages: probably dump in `#lunch-suggestion` with a close button, one at a time
+- display lunch suggestion, but async in a [PlaceDetails](https://developers.google.com/maps/documentation/javascript/places#place_details_results) request, and update with more info (opening hours, more photos) once it arrives, reusing the same template.
 - map improvements
   - Accessing Additional Results <https://developers.google.com/maps/documentation/javascript/places>
   - small tooltip on marker hover (bootstrap?)
   - fetch more results when we zoom or pan. should be careful not smash heaps of requests or we'll get rate limited
+  - some algorithm to separate markers which are too close together (some strips of shops end up all over eachother) [like this](http://www.optimit.hr/blog/-/blogs/optimizing-icon-position-with-google-maps-api) but less grid-y
 
 ## performance bottlenecks
 - we recalculate distance between location and points often

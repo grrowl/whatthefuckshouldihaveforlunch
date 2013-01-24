@@ -16,6 +16,8 @@ var Lunch = {
   locationMarker: undefined,
   infoWindow: undefined,
 
+  pinTimeout: 0,
+
   // start app
   init: function () {
     UI.init();
@@ -36,7 +38,7 @@ var Lunch = {
     var mapOptions = {
       center: latLng,
       zoom: 15,
-      minZoom: 15,
+      minZoom: 14,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
     Lunch.map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
@@ -138,7 +140,8 @@ var Lunch = {
   loadPlaces: function (query) {
     onionLayer.assertReady('map');
 
-    service = new google.maps.places.PlacesService(Lunch.map);
+    Lunch.pinTimeout = 0;
+    var service = new google.maps.places.PlacesService(Lunch.map);
 
     service.nearbySearch({
       location: Lunch.location,
@@ -160,7 +163,6 @@ var Lunch = {
   // handles a google place search reply
   placesLoadHander: function (results, status) {
     onionLayer.isReady('places');
-
     var marker, exists, place;
 
     if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -193,10 +195,17 @@ var Lunch = {
           position: place.geometry.location,
           title: place.name,
           icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
-          place: place
+          place: place,
+          visible: false
         });
 
         Lunch.markers.push(marker);
+
+        setTimeout(function (marker) {
+          return function () {
+            marker.setVisible(true);
+          }
+        }(marker), Lunch.pinTimeout += 50);
 
         google.maps.event.addListener(marker, 'click', Lunch.showInfo );
       }
@@ -231,21 +240,24 @@ var Lunch = {
   },
 
   // shows an info bubble for a particlar map
-  showPlaceInfo: function (place) {
-    Lunch.showInfo.call({ place: place }, { latLng: place.geometry.location });
+  showPlaceInfo: function (place, infoWindowOptions) {
+    Lunch.showInfo.call({ place: place }, { latLng: place.geometry.location }, infoWindowOptions);
   },
 
   // show an info bubble, event handler for marker.click
   // REQUIRES map
-  showInfo: function (pos) {
+  showInfo: function (pos, infoWindowOptions) {
     onionLayer.assertReady('map');
 
     var place = this.place;
+    infoWindowOptions = infoWindowOptions || { disableAutoPan: false };
 
     if (Lunch.infoWindow === undefined)
       Lunch.infoWindow = new google.maps.InfoWindow({ maxWidth: 500 });
     else
       Lunch.infoWindow.close();
+
+    Lunch.infoWindow.setOptions(infoWindowOptions);
 
     var html = Templates.placeInfo(place);
 
@@ -377,8 +389,15 @@ var UI = {
     var place = Lunch.randomPlace();
 
     suggestion.html(Templates.lunchSuggestion(place));
-    if (place)
-      Lunch.showPlaceInfo(place);
+    if (place) {
+      // zoom to bounds
+      var bounds = new google.maps.LatLngBounds();
+      bounds.extend(Lunch.location);
+      bounds.extend(place.geometry.location);
+      Lunch.map.fitBounds(bounds);
+
+      Lunch.showPlaceInfo(place, { disableAutoPan: true });
+    }
   }
 }
 
