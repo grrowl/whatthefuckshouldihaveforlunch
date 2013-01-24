@@ -139,58 +139,69 @@ var Lunch = {
     onionLayer.assertReady('map');
 
     service = new google.maps.places.PlacesService(Lunch.map);
+
     service.nearbySearch({
       location: Lunch.location,
       // radius: 500,
       keyword: query,
       rankBy: google.maps.places.RankBy.DISTANCE,
       types: Lunch.place_types[0]
-    }, 
-    function (results, status) {
-      var marker, exists, place;
+    }, Lunch.placesLoadHander);
 
-      if (status == google.maps.places.PlacesServiceStatus.OK) {
-        for (var i = 0; i < results.length; i++) {
-          // search for this point in our local cache
-          place = results[i];
-          exists = false;
+    service.nearbySearch({
+      location: Lunch.location,
+      radius: 750 ,
+      keyword: query,
+      rankBy: google.maps.places.RankBy.PROMINENCE,
+      types: Lunch.place_types[0]
+    }, Lunch.placesLoadHander);
+  },
 
-          for (var j = 0; j < Lunch.places.length; j++) {
-            if (Lunch.places[j].id === place.id) {
-              exists = j;
-              break; // this place exists, bail
-            }
+  // handles a google place search reply
+  placesLoadHander: function (results, status) {
+    var marker, exists, place;
+
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+      for (var i = 0; i < results.length; i++) {
+        // search for this point in our local cache
+        place = results[i];
+        exists = false;
+
+        for (var j = 0; j < Lunch.places.length; j++) {
+          if (Lunch.places[j].id === place.id) {
+            exists = j;
+            break; // this place exists, bail
           }
-          if (exists !== false) {
-            // add to locationplaces
-            Lunch.locationPlaces[exists] = Lunch.distanceTo(place.geometry.location);
-            break;
-
-          } else {
-            // add to places cache and locationplaces
-            place.index = Lunch.places.length;
-            Lunch.locationPlaces[Lunch.places.push(place) - 1] = Lunch.distanceTo(place.geometry.location);
-          }
-
-          marker = new google.maps.Marker({
-            map: Lunch.map,
-            animation: google.maps.Animation.DROP,
-
-            position: place.geometry.location,
-            title: place.name,
-            icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
-            place: place
-          });
-
-          Lunch.markers.push(marker);
-
-          google.maps.event.addListener(marker, 'click', Lunch.showInfo );
         }
-      }
+        if (exists !== false) {
+          // add to locationplaces
+          Lunch.locationPlaces[exists] = Lunch.distanceTo(place.geometry.location);
+          break;
 
-      Lunch.zoomToLocationPlaces();
-      setTimeout(UI.placesListUpdate, 450);
-    });
+        } else {
+          // add to places cache and locationplaces
+          place.index = Lunch.places.length;
+          Lunch.locationPlaces[Lunch.places.push(place) - 1] = Lunch.distanceTo(place.geometry.location);
+        }
+
+        marker = new google.maps.Marker({
+          map: Lunch.map,
+          animation: google.maps.Animation.DROP,
+
+          position: place.geometry.location,
+          title: place.name,
+          icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
+          place: place
+        });
+
+        Lunch.markers.push(marker);
+
+        google.maps.event.addListener(marker, 'click', Lunch.showInfo );
+      }
+    }
+
+    Lunch.zoomToLocationPlaces();
+    setTimeout(UI.placesListUpdate, 450);
   },
 
   // calculates distance to current location
@@ -362,8 +373,12 @@ var onionLayer = {
   },
 
   assertReady: function (type) {
-    if (onionLayer.readyAPIs.indexOf(type) === -1)
+    if (onionLayer.readyAPIs.indexOf(type) === -1) {
       console.error('API assertion for "'+ type +'" failed!');
+      return false;
+    }
+
+    return true; // A-OK
   }
 }
 

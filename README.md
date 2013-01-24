@@ -20,6 +20,6 @@ solving the age-old question with maps and science
 - if desperate,
   - more aggressive object caching, `new google.maps.anything` overhead
   - investigate overhead of all the onionLayer calls
-- not performance, but will eventually need to rewrite the for and for..in statements in a friendlier way ($.each)
+- not performance, but will eventually need to rewrite the `for` and `for..in` statements in a friendlier way ($.each)
 
 ## known bugs
