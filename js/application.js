@@ -4,12 +4,14 @@ var Lunch = {
     ['bar', 'food', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
     ['casino', 'liquor_store', 'night_club']
   ],
+  default_location: [-37.80544, 144.98331], // collingwood
 
   map: undefined,
   location: undefined,
   places: [],
   markers: [],
 
+  locationMarker: undefined,
   infoWindow: undefined,
 
   // start app
@@ -19,11 +21,15 @@ var Lunch = {
     Templates.init();
   },
 
+  // notifies UI and onionLayer that a service is ready
+  isReady: function (type) {
+    UI.isReady(type);
+    onionLayer.isReady(type);
+  },
+
   // google maps api is ready!
   mapInit: function () {
-    UI.isReady('map');
-
-    latLng = Lunch.location || new google.maps.LatLng(-37.80544, 144.98331);
+    latLng = Lunch.location || new google.maps.LatLng(Lunch.default_location[0], Lunch.default_location[1]);
 
     var mapOptions = {
       center: latLng,
@@ -36,71 +42,98 @@ var Lunch = {
     google.maps.event.addListener(Lunch.map, 'click', Lunch.hideInfo );
 
     Lunch.geoInit();
+
+    Lunch.isReady('map');
   },
 
   // reset map location and contents
   mapUpdate: function (location) {
-    var firstMap = (Lunch.map === undefined);
-    if (firstMap)
-      Lunch.mapInit();
+    onionLayer.call('map', function () {
+      location = location || Lunch.location; 
 
-    location = location || Lunch.location; 
-
-    if (firstMap)
-      Lunch.map.setCenter(location);
-    else
       Lunch.map.panTo(location);
-    // Lunch.map.setZoom(16);
-
-    Lunch.loadPlaces();
+      Lunch.loadPlaces();
+    });
   },
 
   // start geolocation services
   geoInit: function () {
+    var $status = $('#locationStatus');
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function (pos) {
-          UI.isReady('geo');
-          $('#geoStatus').text('Located');
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          $status.text('Located');
 
           Lunch.geoCallback(pos);
+          Lunch.isReady('geo');
         }, 
-        function() {
-          $('#geoStatus').text('Not found');
+        function(code, message) {
+          switch (code) {
+            case 1: // PERMISSION_DENIED
+              $status.text('Not allowed');
+              break;
+
+            default:
+            case 2: // POSITION_UNAVAILABLE
+            case 3: // TIMEOUT
+              $status.text('Geo unavailable');            
+          }
         }
       );      
     } else {
-      $('#geoStatus').text('');
+      $status.text('');
     }
   },
 
   // geolocation is set!
   geoCallback: function (pos) {
-    Lunch.location = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-    Lunch.mapUpdate();
-
-    var infowindow = new google.maps.Marker({
-      map: Lunch.map,
-      position: Lunch.location,
-      title: 'My position'
+    onionLayer.call('map', function () {
+      Lunch.setLocation(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
     });
   },
 
   // set location from string
+  // WAITS ON map
   locationFromString: function (locationString) {
-    var service = new google.maps.Geocoder();
-    service.geocode({
-      address: locationString,
-      region: 'au' // prefer Australia for now
-    }, function (results, status) {
-      if (status == google.maps.GeocoderStatus.OK) {
-        Lunch.location = results[0].geometry.location;
-        Lunch.mapUpdate();
-      }
+    onionLayer.call('map', function () {
+      var service = new google.maps.Geocoder();
+      service.geocode({
+        address: locationString,
+        region: 'au' // prefer Australia for now
+      }, function (results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          Lunch.setLocation(results[0].geometry.location);
+        }
+      });
     });
   },
 
+  // update location and map
+  // REQUIRES map
+  setLocation: function (latLng) {
+    onionLayer.assertReady('map');
+    Lunch.isReady('location');
+
+    Lunch.location = latLng;
+    Lunch.mapUpdate();
+
+    if (Lunch.locationMarker === undefined) {
+      Lunch.locationMarker = new google.maps.Marker({ 
+        map: Lunch.map,
+        title: 'My Location',
+        icon: 'http://labs.google.com/ridefinder/images/mm_20_blue.png'
+      });
+    }
+
+    Lunch.locationMarker.setPosition(latLng);
+    Lunch.locationMarker.setAnimation(google.maps.Animation.DROP);
+  },
+
   // load 'places' from google
+  // REQUIRES map
   loadPlaces: function (query) {
+    onionLayer.assertReady('map');
+
     service = new google.maps.places.PlacesService(Lunch.map);
     service.nearbySearch({
       location: Lunch.location,
@@ -110,30 +143,31 @@ var Lunch = {
       types: Lunch.place_types[0]
     }, 
     function (results, status) {
-      var marker, exists;
+      var marker, exists, place;
 
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         for (var i = 0; i < results.length; i++) {
           // search for this point in our local cache
+          place = results[i];
           exists = false;
+
           for (var j = 0; j < Lunch.places.length; j++) {
-            if (Lunch.places[j].id === results[i].id) {
+            if (Lunch.places[j].id === place.id) {
               exists = true;
               break; // this place exists, bail
             }
           }
           if (exists) break;
-
-          // console.log('New place:', results[i]);
-          Lunch.places.push(results[i]);
+          Lunch.places.push(place);
 
           marker = new google.maps.Marker({
             map: Lunch.map,
             animation: google.maps.Animation.DROP,
 
-            position: results[i].geometry.location,
-            title: results[i].name,
-            place: results[i]
+            position: place.geometry.location,
+            title: place.name,
+            icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
+            place: place
           });
 
           Lunch.markers.push(marker);
@@ -146,12 +180,17 @@ var Lunch = {
     });
   },
 
+  // show an info bubble
+  // REQUIRES map
   showInfo: function (pos) {
-    console.log('showInfo', this, pos);
+    onionLayer.assertReady('map');
+
     var place = this.place;
 
     if (Lunch.infoWindow === undefined) 
       Lunch.infoWindow = new google.maps.InfoWindow();
+    else
+      Lunch.infoWindow.close();
 
     var html = Templates.placeInfo(place);
 
@@ -160,6 +199,8 @@ var Lunch = {
     Lunch.infoWindow.open(Lunch.map);
   },
 
+  // hides an existing infobubble
+  // self-protected against API map
   hideInfo: function () {
     if (Lunch.infoWindow !== undefined)
       Lunch.infoWindow.close();
@@ -196,27 +237,22 @@ var UI = {
   isReady: function (type) {
     $('.'+ type +'NotReady').fadeOut(600, function (a) {
       if (type == 'geo')
-        $('#manual-location').insertAfter($('#places-list'));
+        $('#manual-location').insertBefore($('#places-list'));
 
       $('.'+ type +'NotReady').remove();
       $('.'+ type +'Ready').fadeIn();
     });
-
-    // special handling for specific types
-    switch (type) {
-      case 'geo': break;
-      case 'map': break;
-    }
   },
 
   // 
   placesListInit: function () {
-    // focus 
-    $('#places-list').on('click', 'tbody tr', function (ev) {
-      var $this = $(this), latLng;
+    onionLayer.call('map', function () {
+      $('#places-list').on('click', 'tbody tr', function (ev) {
+        var $this = $(this), latLng;
 
-      latLng = Lunch.places[$this.data('index')].geometry.location;
-      Lunch.mapUpdate(latLng);
+        latLng = Lunch.places[$this.data('index')].geometry.location;
+        Lunch.mapUpdate(latLng);
+      });
     });
   },
 
@@ -233,6 +269,41 @@ var UI = {
   }
 }
 
+// wraps deferred APIs
+var onionLayer = {
+  deferredCalls: {},
+  readyAPIs: [],
+
+  // services only ever go READY, never UNREADY
+  isReady: function (type) {
+    onionLayer.readyAPIs.push(type);
+
+    if (onionLayer.deferredCalls[type] !== undefined) {
+      while (onionLayer.deferredCalls[type].length > 0) {
+        (onionLayer.deferredCalls[type].shift()).call();
+      }
+    }
+  },
+
+  call: function (type, callback) {
+    if (onionLayer.readyAPIs.indexOf(type) > -1) {
+      // it's ready, immediately fire callback
+      callback.call();
+
+    } else {
+      if (onionLayer.deferredCalls[type] === undefined)
+        onionLayer.deferredCalls[type] = [];
+
+      onionLayer.deferredCalls[type].push(callback);
+    }
+  },
+
+  assertReady: function (type) {
+    if (onionLayer.readyAPIs.indexOf(type) === -1)
+      console.error('API assertion for "'+ type +'" failed!');
+  }
+}
+
 Handlebars.registerHelper('distanceTo', function (latLng) {
   if (!Lunch.location)
     return '';
@@ -245,4 +316,3 @@ Handlebars.registerHelper('distanceTo', function (latLng) {
 });
 
 $(Lunch.init);
-// $(document).on('load', Lunch.mapsInit);

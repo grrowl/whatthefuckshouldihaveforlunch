@@ -9,7 +9,7 @@ body {
 }
 
 /* geolocation status */
-.geoReady, .mapsReady {
+.geoReady, .mapsReady, .locationReady {
   display: none;
 }
 
@@ -24,7 +24,7 @@ body {
 
 
 h1 {
-  font-size: 24px;
+  font-size: 21px;
 }
 
 .jumbotron {
@@ -36,6 +36,9 @@ h1 {
   line-height: 1;
 }
 
+#manual-location {
+  text-align: center;
+}
 #manual-location .btn {
   font-size: 21px;
   padding: 14px 24px;
@@ -58,6 +61,7 @@ hr.pre-map {
 }
 hr.post-map {
   margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 #map-area {
@@ -88,6 +92,9 @@ hr.post-map {
   float: left;
 }
 
+#places-list {
+  padding-top: 20px;
+}
 #places-list thead {
   /*display: none;*/
 }

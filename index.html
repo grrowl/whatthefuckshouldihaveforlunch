@@ -21,10 +21,16 @@
     <div class="masthead">
       <ul class="nav nav-pills pull-right">
         <li>
-          <a><i class="icon-map-marker"></i></a>
+          <a id="locationStatus">Locating...</a>
         </li>
-        <li>
-          <a id="geoStatus">Locating...</a>
+        <li class="locationNotReady geoNotReady">
+          <a><i class="icon-question-sign"></i></a>
+        </li>
+        <li class="locationReady geoNotReady">
+          <a><i class="icon-pencil"></i></a>
+        </li>
+        <li class="geoReady">
+          <a><i class="icon-map-marker"></i></a>
         </li>
       </ul>
       <h1>what the fuck should I have for lunch?</h1>
@@ -34,7 +40,7 @@
 
     <div id="map-area">
       <div id="map-canvas"></div>
-      <div class="jumbotron geoNotReady">
+      <div class="jumbotron locationNotReady">
         <h2>We're locating you now...</h2>
         <div id="manual-location">
           <p class="lead">If you don't have geolocation or are heading out, enter a location below:</p>
@@ -138,12 +144,14 @@
     
   </script>
 
-  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&amp;libraries=places,geometry&amp;sensor=true"></script>
 
   <script src="js/handlebars.js"></script>
   <script src="js/zepto.min.js"></script>
   <script src="js/zepto-fx_methods.js"></script>
   <script src="js/application.js"></script>
+
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&amp;libraries=places,geometry&amp;sensor=true&amp;callback=Lunch.mapInit"></script>
+
   <!--
   <script src="js/jquery-1.9.0.min.js"></script>
   <script src="js/bootstrap-transition.js"></script>

@@ -1,6 +1,11 @@
 # what the fuck should i have for lunch?
 solving the age-old question with maps and science
 
+## app layout
+- **Lunch**: core app functionality
+- **UI**: handles most UI binding, handling
+- **onionLayer*: ensures code doesn't execute before dependent services are ready
+
 ### todo
 - better UI feedback: loading (blocked), done (success), error.
   - Places: <https://developers.google.com/maps/documentation/javascript/places#place_search_responses>
@@ -13,3 +18,5 @@ solving the age-old question with maps and science
   - small tooltip on marker hover
   - `places-list` should only list points visible within viewport
   - better icons: 'your location'
+
+### known bugs
