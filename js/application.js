@@ -36,6 +36,8 @@ var Lunch = {
     latLng = Lunch.location || new google.maps.LatLng(Lunch.default_location[0], Lunch.default_location[1]);
 
     var mapOptions = {
+      backgroundColor: 'white',
+      panControl: false,
       center: latLng,
       zoom: 15,
       minZoom: 14,
@@ -127,7 +129,11 @@ var Lunch = {
       Lunch.locationMarker = new google.maps.Marker({ 
         map: Lunch.map,
         title: 'My Location',
-        icon: 'http://labs.google.com/ridefinder/images/mm_20_blue.png'
+        icon: 'http://labs.google.com/ridefinder/images/mm_20_blue.png',
+        shadow: {
+          anchor: { x: 5, y: 20 },
+          url: 'http://labs.google.com/ridefinder/images/mm_20_shadow.png'
+        }
       });
     }
 
@@ -194,7 +200,12 @@ var Lunch = {
 
           position: place.geometry.location,
           title: place.name,
-          icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
+          // icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
+          icon: 'http://labs.google.com/ridefinder/images/mm_20_red.png',
+          shadow: {
+            anchor: { x: 5, y: 20 },
+            url: 'http://labs.google.com/ridefinder/images/mm_20_shadow.png'
+          },
           place: place,
           visible: false
         });
