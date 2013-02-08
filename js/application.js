@@ -194,36 +194,43 @@ var Lunch = {
           Lunch.locationPlaces[Lunch.places.push(place) - 1] = Lunch.distanceTo(place.geometry.location);
         }
 
-        marker = new google.maps.Marker({
-          map: Lunch.map,
-          animation: google.maps.Animation.DROP,
-
-          position: place.geometry.location,
-          title: place.name,
-          // icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
-          icon: 'http://labs.google.com/ridefinder/images/mm_20_red.png',
-          shadow: {
-            anchor: { x: 5, y: 20 },
-            url: 'http://labs.google.com/ridefinder/images/mm_20_shadow.png'
-          },
-          place: place,
-          visible: false
-        });
-
-        Lunch.markers.push(marker);
-
-        setTimeout(function (marker) {
-          return function () {
-            marker.setVisible(true);
-          }
-        }(marker), Lunch.pinTimeout += 50);
-
-        google.maps.event.addListener(marker, 'click', Lunch.showInfo );
+        Lunch.markers.push(Lunch.addPlaceToMap(place));
       }
     }
 
     Lunch.zoomToLocationPlaces();
     setTimeout(UI.placesListUpdate, 450);
+  },
+
+  // generic add places to the map
+  addPlaceToMap: function (place, color) {
+    color = color || 'red';
+
+    var marker = new google.maps.Marker({
+      map: Lunch.map,
+      animation: google.maps.Animation.DROP,
+
+      position: place.geometry.location,
+      title: place.name,
+      // icon: { url: place.icon, scaledSize: new google.maps.Size(25, 25) },
+      icon: 'http://labs.google.com/ridefinder/images/mm_20_'+ color +'.png',
+      shadow: {
+        anchor: { x: 5, y: 20 },
+        url: 'http://labs.google.com/ridefinder/images/mm_20_shadow.png'
+      },
+      place: place,
+      visible: false
+    });
+
+    setTimeout(function (marker) {
+      return function () {
+        marker.setVisible(true);
+      }
+    }(marker), Lunch.pinTimeout += 50);
+
+    google.maps.event.addListener(marker, 'click', Lunch.showInfo );
+
+    return marker;
   },
 
   // calculates distance to current location
@@ -299,6 +306,44 @@ var Lunch = {
     var index = pickRandomProperty(Lunch.locationPlaces);
     if (index !== undefined)
       return Lunch.places[index];
+  },
+
+  search: {
+    markers: [],
+    box: undefined,
+
+    init: function () {
+      var searchBox = Lunch.search.box = new google.maps.places.SearchBox($('#map-search-input')[0]);
+
+      searchBox.bindTo('bounds', Lunch.map);
+      google.maps.event.addListener(searchBox, 'places_changed', Lunch.search.handler);
+    },
+
+    handler: function () {
+      var places = Lunch.search.box.getPlaces(); // returns all matches, unless user specifically chose one
+
+      Lunch.pinTimeout = 0;
+      Lunch.search.reset(); // reset
+
+      var bounds = new google.maps.LatLngBounds();
+      for (var i = 0, place; place = places[i]; i++) {
+        Lunch.search.markers.push(Lunch.addPlaceToMap(place, 'green'));
+
+        bounds.extend(place.geometry.location);
+      }
+
+      Lunch.showPlaceInfo(places[0]);
+
+      Lunch.map.fitBounds(bounds);
+    },
+
+    // remove markers and clear search.markers array
+    reset: function () {
+      for (var i = 0, marker; marker = Lunch.search.markers[i]; i++) {
+        marker.setMap(null);
+      }
+      Lunch.search.markers = [];
+    }
   }
 }
 
@@ -322,6 +367,7 @@ var UI = {
   init: function () {
     UI.placesListInit();
 
+    // lunch suggestion button
     onionLayer.call('places', function () {
       $('h1').on('click', UI.suggestLunch)
         .html('<a class="btn btn-large">'+ $('h1').text() +'</a>');
@@ -330,6 +376,9 @@ var UI = {
         $(this).parents('#lunch-suggestion').empty();
       });
     });
+
+    // search by name functionality
+    onionLayer.call('places', Lunch.search.init);
 
     // manual-location
     $('#manual-location input').on('keypress', function (ev) {

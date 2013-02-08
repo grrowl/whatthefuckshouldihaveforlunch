@@ -17,6 +17,7 @@ solving the age-old question with maps and science
   - small tooltip on marker hover ([tooltips for gmaps](https://github.com/medelbou/Tooltip-for-Google-Maps) is a good starting point)
   - fetch more results when we zoom or pan. should be careful not smash heaps of requests or we'll get rate limited
   - some algorithm to separate markers which are too close together (some strips of shops end up all over eachother) [like this](http://www.optimit.hr/blog/-/blogs/optimizing-icon-position-with-google-maps-api) but less grid-y
+- [more in github issues](https://github.com/grrowl/whatthefuckshouldihaveforlunch/issues?labels=enhancement)
 
 ## performance bottlenecks
 - we recalculate distance between location and points often
@@ -27,6 +28,7 @@ solving the age-old question with maps and science
 - not performance, but will eventually need to rewrite the `for` and `for..in` statements in a friendlier way ($.each)
 
 ## known bugs
+- <https://github.com/grrowl/whatthefuckshouldihaveforlunch/issues?labels=bug>
 
 ## references
 - google map icons: <https://sites.google.com/site/gmapicons/home>

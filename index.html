@@ -45,6 +45,9 @@
 
     <div id="map-area">
       <div id="map-canvas"></div>
+      <div id="map-search">
+        <input type="search" id="map-search-input" placeholder="Find your favourite lunch&hellip;" />
+      </div>
       <div class="jumbotron locationNotReady">
         <h2>We're locating you now...</h2>
         <div id="manual-location">
@@ -115,16 +118,21 @@
   </div>
 
   <script id="placeInfo-template" type="text/x-handlebars-template">
-    <div class="place-info">
+    <div class="place-info" data-index="{{index}}">
       <img class="place-type" src="{{icon}}" />
       <h2>{{name}}</h2>
-      <p>At: {{vicinity}}</p>
+      {{#if vicinity}}
+        <p>At: {{vicinity}}</p>
+      {{/if}}
       {{#if rating}}
         <p>{{rating}} <i class="icon-star"></i></p>
       {{/if}}
       {{#if opening_hours.open_now}}
         <p>Open now!</p>
       {{/if}}
+      <a class="bump-place btn btn-small btn-info pull-right">
+        <i class="icon-heart icon-white"></i> I love this place!
+      </a>
     </div>
   </script>
   <script id="placeList-template" type="text/x-handlebars-template">
