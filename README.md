@@ -11,6 +11,7 @@ solving the age-old question with maps and science
 - better UI feedback: loading (blocked), done (success), error.
   - Places: <https://developers.google.com/maps/documentation/javascript/places#place_search_responses>
   - contextual error messages: probably dump in `#lunch-suggestion` with a close button, one at a time
+  - itErrored(elem): looks for icons to turn to X's, `btn`'s to turn to `btn-error`s, bubble until the top (then show error)
 - display lunch suggestion, but async in a [PlaceDetails](https://developers.google.com/maps/documentation/javascript/places#place_details_results) request, and update with more info (opening hours, more photos) once it arrives, reusing the same template.
 - map improvements
   - Accessing Additional Results <https://developers.google.com/maps/documentation/javascript/places>

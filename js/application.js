@@ -5,6 +5,7 @@ var Lunch = {
     ['casino', 'liquor_store', 'night_club']
   ],
   default_location: [-37.80544, 144.98331], // collingwood
+  googleKey: 'AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I',
 
   map: undefined,
   location: undefined,
@@ -12,6 +13,7 @@ var Lunch = {
   markers: [],
 
   locationPlaces: {}, // object map of placeindex => distance. reset on setLocation
+  searchedPlaces: {}, // object map of placeindex => ??. reset on new search query
 
   locationMarker: undefined,
   infoWindow: undefined,
@@ -268,7 +270,7 @@ var Lunch = {
     onionLayer.assertReady('map');
 
     var place = this.place;
-    infoWindowOptions = infoWindowOptions || { disableAutoPan: false };
+    infoWindowOptions = infoWindowOptions || { disableAutoPan: false }; // will need refactor with >1 option
 
     if (Lunch.infoWindow === undefined)
       Lunch.infoWindow = new google.maps.InfoWindow({ maxWidth: 500 });
@@ -327,6 +329,7 @@ var Lunch = {
 
       var bounds = new google.maps.LatLngBounds();
       for (var i = 0, place; place = places[i]; i++) {
+        place.index = Lunch.places.length;
         Lunch.search.markers.push(Lunch.addPlaceToMap(place, 'green'));
 
         bounds.extend(place.geometry.location);
@@ -343,6 +346,30 @@ var Lunch = {
         marker.setMap(null);
       }
       Lunch.search.markers = [];
+    }
+  },
+
+  placeBump: {
+    endpoint: 'http://www.chillidonut.com/junk/lunch/bump-place.php', // CORS proxy
+
+    init: function() {
+      $('#map-area').on('click', '.bump-place', function () {
+        var $this = $(this)
+            index = $this.parents('.place-info').data('index');
+
+        if (!index) return console.error('No index on placeInfo element');
+
+        var bump = $.post(Lunch.placeBump +'?sensor=false&key='+ Lunch.googleKey, {
+          reference: Lunch.places[index].reference
+        })
+          .fail(function (xhr, status, errorThrown) {
+            console.log("error bumping place", Lunch.places[index], status, errorThrown);
+          })
+          .success(function (data, status, xhr) {
+            console.log("bumpin fists", data, status);
+            $this.removeClass('btn-info').addClass('btn-success');
+          });
+      });
     }
   }
 }
@@ -379,6 +406,8 @@ var UI = {
 
     // search by name functionality
     onionLayer.call('places', Lunch.search.init);
+
+    onionLayer.call('map', Lunch.placeBump.init);
 
     // manual-location
     $('#manual-location input').on('keypress', function (ev) {
