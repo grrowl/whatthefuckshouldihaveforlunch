@@ -14,7 +14,7 @@ solving the age-old question with maps and science
 - display lunch suggestion, but async in a [PlaceDetails](https://developers.google.com/maps/documentation/javascript/places#place_details_results) request, and update with more info (opening hours, more photos) once it arrives, reusing the same template.
 - map improvements
   - Accessing Additional Results <https://developers.google.com/maps/documentation/javascript/places>
-  - small tooltip on marker hover (bootstrap?)
+  - small tooltip on marker hover ([tooltips for gmaps](https://github.com/medelbou/Tooltip-for-Google-Maps) is a good starting point)
   - fetch more results when we zoom or pan. should be careful not smash heaps of requests or we'll get rate limited
   - some algorithm to separate markers which are too close together (some strips of shops end up all over eachother) [like this](http://www.optimit.hr/blog/-/blogs/optimizing-icon-position-with-google-maps-api) but less grid-y
 
@@ -27,3 +27,7 @@ solving the age-old question with maps and science
 - not performance, but will eventually need to rewrite the `for` and `for..in` statements in a friendlier way ($.each)
 
 ## known bugs
+
+## references
+- google map icons: <https://sites.google.com/site/gmapicons/home>
+- tooltips for gmaps: <https://github.com/medelbou/Tooltip-for-Google-Maps>

@@ -65,11 +65,11 @@ var Lunch = {
 
   // start geolocation services
   geoInit: function () {
-    var $status = $('#locationStatus');
+    // var $status = $('#locationStatus');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         function (pos) {
-          $status.text('Located');
+          // $status.text('Located');
 
           Lunch.geoCallback(pos);
           Lunch.isReady('geo');
@@ -77,13 +77,13 @@ var Lunch = {
         function(code, message) {
           switch (code) {
             case 1: // PERMISSION_DENIED
-              $status.text('Not allowed');
+              // $status.text('Not allowed');
               break;
 
             default:
             case 2: // POSITION_UNAVAILABLE
             case 3: // TIMEOUT
-              $status.text('Geo unavailable');            
+              // $status.text('Geo unavailable');            
           }
         }
       );      
