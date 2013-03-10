@@ -369,10 +369,12 @@ var Lunch = {
 
     init: function() {
       $('#map-area').on('click', '.bump-place', function () {
-        var $this = $(this)
+        var $this = $(this),
+            $icon = $this.find('i'),
             index = $this.parents('.place-info').data('index');
 
         if (!index) return console.error('No index on placeInfo element');
+        $icon.removeClass('btn-info').addClass('icon-refresh');
 
         $.ajax({
           type: 'POST',
@@ -382,12 +384,32 @@ var Lunch = {
           data: JSON.stringify({
             reference: Lunch.places[index].reference
           }),
+          dataType: 'json',
           error: function (xhr, status, errorThrown) {
             console.log("error bumping place", Lunch.places[index], status, errorThrown);
           },
           success: function (data, status, xhr) {
-            console.log("bumpin fists", data, status);
-            $this.removeClass('btn-info').addClass('btn-success');
+            $this.removeClass('btn-info');
+            $icon.removeClass('icon-refresh');
+
+            switch (data.status.toLowerCase()) {
+              case 'ok':
+                // yay!
+                console.log('bump success', data);
+                $this.addClass('btn-success');
+                $icon.addClass('icon-ok');
+                break;
+
+              case 'proxy_error':
+                console.error('bump error', data);
+                $icon.addClass('icon-remove');
+                break;
+
+              default:
+                console.warn('bump unknown error', data);
+                $icon.addClass('icon-question-sign');
+                break;
+            }
           }
         });
       });
