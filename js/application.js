@@ -177,14 +177,8 @@ var Lunch = {
       for (var i = 0; i < results.length; i++) {
         // search for this point in our local cache
         place = results[i];
-        exists = false;
+        exists = Lunch.placeExists(place);
 
-        for (var j = 0; j < Lunch.places.length; j++) {
-          if (Lunch.places[j].id === place.id) {
-            exists = j;
-            break; // this place exists, bail
-          }
-        }
         if (exists !== false) {
           // add to locationplaces
           Lunch.locationPlaces[exists] = Lunch.distanceTo(place.geometry.location);
@@ -202,6 +196,15 @@ var Lunch = {
 
     Lunch.zoomToLocationPlaces();
     setTimeout(UI.placesListUpdate, 450);
+  },
+
+  placeExists: function (place) {
+    for (var i = 0; i < Lunch.places.length; i++) {
+      if (Lunch.places[i].id === place.id) {
+        return i; // this place exists, bail
+      }
+    }
+    return false;
   },
 
   // generic add places to the map
@@ -311,7 +314,6 @@ var Lunch = {
   },
 
   search: {
-    markers: [],
     box: undefined,
 
     init: function () {
@@ -327,10 +329,23 @@ var Lunch = {
       Lunch.pinTimeout = 0;
       Lunch.search.reset(); // reset
 
-      var bounds = new google.maps.LatLngBounds();
+      var exists, marker,
+          bounds = new google.maps.LatLngBounds();
       for (var i = 0, place; place = places[i]; i++) {
-        place.index = Lunch.places.length;
-        Lunch.search.markers.push(Lunch.addPlaceToMap(place, 'green'));
+        exists = Lunch.placeExists(place);
+
+        if (exists === false) {
+          place.index = Lunch.places.length;
+          exists = Lunch.places.push(place) - 1;
+        }
+
+        marker = Lunch.addPlaceToMap(place, 'green');
+        // TODO: if this place already exists, it will already have a marker. but we want green ones
+        if (exists === false)
+          Lunch.markers.push(marker);
+
+        // add to places cache and searchedPlaces
+        Lunch.searchedPlaces[exists] = marker;
 
         bounds.extend(place.geometry.location);
       }
@@ -342,15 +357,15 @@ var Lunch = {
 
     // remove markers and clear search.markers array
     reset: function () {
-      for (var i = 0, marker; marker = Lunch.search.markers[i]; i++) {
+      for (var i = 0, marker; marker = Lunch.searchedPlaces[i]; i++) {
         marker.setMap(null);
       }
-      Lunch.search.markers = [];
+      Lunch.searchedPlaces = {};
     }
   },
 
   placeBump: {
-    endpoint: 'http://www.chillidonut.com/junk/lunch/bump-place.php', // CORS proxy
+    endpoint: 'http://www.chillidonut.com/junk/lunch/places-bump.php', // CORS proxy
 
     init: function() {
       $('#map-area').on('click', '.bump-place', function () {
@@ -359,16 +374,22 @@ var Lunch = {
 
         if (!index) return console.error('No index on placeInfo element');
 
-        var bump = $.post(Lunch.placeBump +'?sensor=false&key='+ Lunch.googleKey, {
-          reference: Lunch.places[index].reference
-        })
-          .fail(function (xhr, status, errorThrown) {
+        $.ajax({
+          type: 'POST',
+          url: Lunch.placeBump.endpoint +'?sensor=false&key='+ Lunch.googleKey,
+          processData: false,
+          contentType: 'application/json',
+          data: JSON.stringify({
+            reference: Lunch.places[index].reference
+          }),
+          error: function (xhr, status, errorThrown) {
             console.log("error bumping place", Lunch.places[index], status, errorThrown);
-          })
-          .success(function (data, status, xhr) {
+          },
+          success: function (data, status, xhr) {
             console.log("bumpin fists", data, status);
             $this.removeClass('btn-info').addClass('btn-success');
-          });
+          }
+        });
       });
     }
   }

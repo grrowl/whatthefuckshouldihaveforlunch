@@ -3,9 +3,14 @@ solving the age-old question with maps and science
 
 ## app layout
 - **Lunch**: core app functionality
+  - **search**: Places search
+  - **placeBump**: "I like this" functionality for higher relevance in radar searches
 - **Templates**: pre-compiles available Handlebars moustaches
 - **UI**: handles most UI binding, handling
 - **onionLayer**: ensures code doesn't execute before dependent services are ready
+
+## places API proxy
+- Bumping places requires a POST to googleapis.com, which we can't do with plain javascript XHRs. Instead, we proxy the requests through my server at chillidonut.com. I've whitelisted a number of domains (including `grrowl.github.com` and `localhost`), but feel free to add your local domain to the list.
 
 ## todo
 - better UI feedback: loading (blocked), done (success), error.
