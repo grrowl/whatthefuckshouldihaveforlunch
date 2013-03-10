@@ -97,7 +97,12 @@ var Lunch = {
   // geolocation is set!
   geoCallback: function (pos) {
     onionLayer.call('map', function () {
-      Lunch.setLocation(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+      var location = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+      Lunch.setLocation(location);
+      
+      $('#locate-me').on('click', function () {
+        Lunch.map.panTo(location);
+      });
     });
   },
 
