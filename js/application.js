@@ -1,6 +1,8 @@
 var Lunch = {
   place_types: [
-    ['bakery', 'cafe', 'meal_takeaway', 'restaurant', 'bar', 'meal_delivery'],
+    // 'other' is our user-added places
+    // <http://www.youtube.com/watch?v=JCgTAWXwjOk&feature=youtu.be&t=19m23s>
+    ['other', 'bakery', 'cafe', 'meal_takeaway', 'restaurant', 'bar', 'meal_delivery'],
     ['food', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
     ['casino', 'liquor_store', 'night_club']
   ],
@@ -25,6 +27,7 @@ var Lunch = {
     UI.init();
     Lunch.geoInit();
     Templates.init();
+    Tracking.init();
   },
 
   // notifies UI and onionLayer that a service is ready
@@ -232,7 +235,7 @@ var Lunch = {
       visible: false
     });
 
-    setTimeout(function (marker) {
+    var pinDrop = setInterval(function (marker) {
       return function () {
         marker.setVisible(true);
       }
@@ -277,7 +280,7 @@ var Lunch = {
   showInfo: function (pos, infoWindowOptions) {
     onionLayer.assertReady('map');
 
-    var place = this.place;
+    var place = this.place, html, zoomBounds;
     infoWindowOptions = infoWindowOptions || { disableAutoPan: false }; // will need refactor with >1 option
 
     if (Lunch.infoWindow === undefined)
@@ -287,10 +290,14 @@ var Lunch = {
 
     Lunch.infoWindow.setOptions(infoWindowOptions);
 
-    var html = Templates.placeInfo(place);
+    html = Templates.placeInfo(place);
+    zoomBounds = new google.maps.LatLngBounds();
+    zoomBounds.extend(place.geometry.location);
+    // zoomBounds.extend({ lat: Lunch.location.lat(), lng: Lunch.location.lng() });
 
     Lunch.infoWindow.setContent(html);
     Lunch.infoWindow.setPosition(pos.latLng);
+    Lunch.map.fitBounds(zoomBounds);
     Lunch.infoWindow.open(Lunch.map);
   },
 
@@ -303,7 +310,7 @@ var Lunch = {
 
   // return random place near location
   randomPlace: function () {
-    // http://stackoverflow.com/a/2532251/894361 : trusting this till vertified
+    // http://stackoverflow.com/a/2532251/894361
     function pickRandomProperty(obj) {
         var result;
         var count = 0;
@@ -370,16 +377,18 @@ var Lunch = {
   },
 
   placeBump: {
-    endpoint: 'http://www.chillidonut.com/junk/lunch/places-bump.php', // CORS proxy
+    endpoint: 'http://www.chillidonut.com/junk/lunch/places-add.php', // CORS proxy
 
     init: function() {
       $('#map-area').on('click', '.bump-place', function () {
         var $this = $(this),
             $icon = $this.find('i'),
-            index = $this.parents('.place-info').data('index');
+            index = $this.parents('.place-info').data('index'),
+            place = Lunch.places[index];
 
         if (!index) return console.error('No index on placeInfo element');
         $icon.removeClass('btn-info').addClass('icon-refresh');
+        Tracking.track('placeAdd', 'Init', place.reference)
 
         $.ajax({
           type: 'POST',
@@ -387,11 +396,16 @@ var Lunch = {
           processData: false,
           contentType: 'application/json',
           data: JSON.stringify({
-            reference: Lunch.places[index].reference
+            location: { lat: Lunch.location.lat(), lng: Lunch.location.lng() },
+            name: place.name,
+            accuracy: 20,
+            types: ['other'],
+            summary: "reference="+ place.reference +"&uid="
           }),
           dataType: 'json',
           error: function (xhr, status, errorThrown) {
             console.log("error bumping place", Lunch.places[index], status, errorThrown);
+            Tracking.track('placeAdd', 'Error', errorThrown);
           },
           success: function (data, status, xhr) {
             $this.removeClass('btn-info');
@@ -401,17 +415,20 @@ var Lunch = {
               case 'ok':
                 // yay!
                 console.log('bump success', data);
+                Tracking.track('placeAdd', 'Success', place.reference);
                 $this.addClass('btn-success');
                 $icon.addClass('icon-ok');
                 break;
 
               case 'proxy_error':
                 console.error('bump error', data);
+                Tracking.track('placeAdd', 'Error', data.status);
                 $icon.addClass('icon-remove');
                 break;
 
               default:
                 console.warn('bump unknown error', data);
+                Tracking.track('placeAdd', 'Error', data.status);
                 $icon.addClass('icon-question-sign');
                 break;
             }
@@ -537,6 +554,32 @@ var UI = {
     }
   }
 }
+
+
+// google analytics
+var Tracking = {
+  queue: [],
+
+  init: function () {
+    Tracking.insertScript();
+  },
+  insertScript: function () {
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-602554-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  },
+  track: function (category, action, label) {
+    _gaq.push(['_trackEvent', category, action, label]);
+  }
+}
+
+
 
 // wraps deferred APIs
 var onionLayer = {

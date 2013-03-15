@@ -34,7 +34,7 @@ if (count($_GET))
 else
   $querystring = '';
 
-define('PROXY_DESTINATION', 'https://maps.googleapis.com/maps/api/place/bump/json' . $querystring);
+define('PROXY_DESTINATION', 'https://maps.googleapis.com/maps/api/place/add/json' . $querystring);
 
 $postbody = file_get_contents("php://input");
 // $postbody = '{"reference":"'. $_POST['place'] .'"}';
@@ -54,7 +54,7 @@ if ($error = curl_error($ch)) {
   // log to file if possible
   if (is_writable('bump.log') && function_exists('json_decode')) {
     $postobj = json_decode($postbody);
-    $logentry = "bump ". date(DATE_ATOM) .":\t";
+    $logentry = "add ". date(DATE_ATOM) .":\t";
     if (is_object($postobj) && $postob['reference']) {
       $logentry .= $postobj['reference'];
     } else {
