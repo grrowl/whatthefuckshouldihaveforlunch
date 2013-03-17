@@ -2,7 +2,8 @@ var Lunch = {
   place_types: [
     // 'other' is our user-added places
     // <http://www.youtube.com/watch?v=JCgTAWXwjOk&feature=youtu.be&t=19m23s>
-    ['other', 'bakery', 'cafe', 'meal_takeaway', 'restaurant', 'bar', 'meal_delivery'],
+    ['other'],
+    ['other', 'bakery', 'cafe', ' ', 'restaurant', 'bar', 'meal_delivery'],
     ['food', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
     ['casino', 'liquor_store', 'night_club']
   ],
@@ -159,47 +160,59 @@ var Lunch = {
     Lunch.pinTimeout = 0;
     var service = new google.maps.places.PlacesService(Lunch.map);
 
-    service.nearbySearch({
+    // service.nearbySearch({
+    //   location: Lunch.location,
+    //   // radius: 750,
+    //   keyword: query,
+    //   rankBy: google.maps.places.RankBy.DISTANCE,
+    //   types: Lunch.place_types[0]
+    // }, Lunch.placesLoadHander);
+
+    // service.nearbySearch({
+    //   location: Lunch.location,
+    //   radius: 750,
+    //   keyword: query,
+    //   rankBy: google.maps.places.RankBy.PROMINENCE,
+    //   types: Lunch.place_types[0]
+    // }, Lunch.placesLoadHander);
+
+    service.nearbySearch(a= {
       location: Lunch.location,
-      // radius: 500,
+      // radius: 50000,
       keyword: query,
       rankBy: google.maps.places.RankBy.DISTANCE,
       types: Lunch.place_types[0]
     }, Lunch.placesLoadHander);
-
-    service.nearbySearch({
-      location: Lunch.location,
-      radius: 750,
-      keyword: query,
-      rankBy: google.maps.places.RankBy.PROMINENCE,
-      types: Lunch.place_types[0]
-    }, Lunch.placesLoadHander);
+    console.log(a);
   },
 
   // handles a google place search reply
   placesLoadHander: function (results, status) {
-    onionLayer.isReady('places');
+    onionLayer.isReady('places'); 
     var marker, exists, place;
 
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-      for (var i = 0; i < results.length; i++) {
-        // search for this point in our local cache
-        place = results[i];
-        exists = Lunch.placeExists(place);
+    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+      console.warn('loadPlaces recieved error', status, results);
+      return false;
+    }
 
-        if (exists !== false) {
-          // add to locationplaces
-          Lunch.locationPlaces[exists] = Lunch.distanceTo(place.geometry.location);
-          break;
+    for (var i = 0; i < results.length; i++) {
+      // search for this point in our local cache
+      place = results[i];
+      exists = Lunch.placeExists(place);
 
-        } else {
-          // add to places cache and locationplaces
-          place.index = Lunch.places.length;
-          Lunch.locationPlaces[Lunch.places.push(place) - 1] = Lunch.distanceTo(place.geometry.location);
-        }
+      if (exists !== false) {
+        // add to locationplaces
+        Lunch.locationPlaces[exists] = Lunch.distanceTo(place.geometry.location);
+        break;
 
-        Lunch.markers.push(Lunch.addPlaceToMap(place));
+      } else {
+        // add to places cache and locationplaces
+        place.index = Lunch.places.length;
+        Lunch.locationPlaces[Lunch.places.push(place) - 1] = Lunch.distanceTo(place.geometry.location);
       }
+
+      Lunch.markers.push(Lunch.addPlaceToMap(place));
     }
 
     Lunch.zoomToLocationPlaces();
@@ -377,7 +390,8 @@ var Lunch = {
   },
 
   placeBump: {
-    endpoint: 'http://www.chillidonut.com/junk/lunch/places-add.php', // CORS proxy
+    // endpoint: 'http://www.chillidonut.com/junk/lunch/places-add.php', // CORS proxy
+    endpoint: 'http://www.chillidonut.com/junk/lunch/places-bump.php', // CORS proxy
 
     init: function() {
       $('#map-area').on('click', '.bump-place', function () {
@@ -396,11 +410,15 @@ var Lunch = {
           processData: false,
           contentType: 'application/json',
           data: JSON.stringify({
-            location: { lat: Lunch.location.lat(), lng: Lunch.location.lng() },
-            name: place.name,
-            accuracy: 20,
-            types: ['other'],
-            summary: "reference="+ place.reference +"&uid="
+            // place/bump fields
+            reference: place.reference
+
+            // place/add fields
+            // location: { lat: Lunch.location.lat(), lng: Lunch.location.lng() },
+            // types: ['other'],
+            // name: place.name,
+            // accuracy: 20,
+            // summary: "reference="+ place.reference +"&uid="
           }),
           dataType: 'json',
           error: function (xhr, status, errorThrown) {
@@ -410,6 +428,8 @@ var Lunch = {
           success: function (data, status, xhr) {
             $this.removeClass('btn-info');
             $icon.removeClass('icon-refresh');
+            // TODO: you can add extra data with a call to /event/new
+            // i.e. new event with data stored in summary field
 
             switch (data.status.toLowerCase()) {
               case 'ok':
