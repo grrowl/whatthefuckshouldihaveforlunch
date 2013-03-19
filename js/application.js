@@ -100,7 +100,6 @@ var Lunch = {
 
   // geolocation is set!
   geoCallback: function (pos) {
-    console.log('geoCallback', pos);
     onionLayer.call('map', function () {
       var location = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
       Lunch.setLocation(location);
