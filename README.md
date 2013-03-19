@@ -1,6 +1,14 @@
 # what the fuck should i have for lunch?
 solving the age-old question with maps and science
 
+## final todos
+1. add some 'inspect' functionality so we can track down why Huxtaburger isn't appearing (i think it may fall outside our place_types[0] selection)
+  * mailto: inspect@whatthefuckshouldihaveforlunch.com?subject=Lunch Inspect&content={place: ""}
+1. display walking directions to place.
+1. launch for god's sake
+1. tweak footer text: include 'favourite place not appearing?' and usage info
+1. set up tracking throughout
+
 ## app layout
 - **Lunch**: core app functionality
   - **search**: Places search
@@ -8,6 +16,7 @@ solving the age-old question with maps and science
 - **Templates**: pre-compiles available Handlebars moustaches
 - **UI**: handles most UI binding, handling
 - **onionLayer**: ensures code doesn't execute before dependent services are ready
+- **Tracking**: badly named google analytics code
 
 ## places API proxy
 - Bumping places requires a POST to googleapis.com, which we can't do with plain javascript XHRs. Instead, we proxy the requests through my server at chillidonut.com. I've whitelisted a number of domains (including `grrowl.github.com` and `localhost`), but feel free to add your local domain to the list.
@@ -58,4 +67,3 @@ solving the age-old question with maps and science
   As described in the accepted answer for [Is the places API not able to retrieve specific places?](http://stackoverflow.com/a/12907945/894361), you can use the Places API to add places of type 'other'. When searching for nearby places using `PlacesService.nearbySearch` by distance and type 'other', it returns INVALID_REQUEST. When searching by relevance, it returns NO_RESULTS, and if any additional or other types are defined it acts normally.
 
   http://jsfiddle.net/Gqcqe/2/
-

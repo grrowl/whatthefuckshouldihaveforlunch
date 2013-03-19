@@ -24,7 +24,10 @@ body {
 
 
 h1 {
-  font-size: 21px;
+  font-size: 21px;  
+}
+h1 a {
+  color: black !important;
 }
 
 .jumbotron {

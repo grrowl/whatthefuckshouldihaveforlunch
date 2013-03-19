@@ -1,10 +1,10 @@
 var Lunch = {
   place_types: [
-    // 'other' is our user-added places
+    // 'other' is our user-added places... apparently.
     // <http://www.youtube.com/watch?v=JCgTAWXwjOk&feature=youtu.be&t=19m23s>
-    ['other'],
-    ['other', 'bakery', 'cafe', ' ', 'restaurant', 'bar', 'meal_delivery'],
-    ['food', 'convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
+    // ['other'],
+    ['other', 'bakery', 'cafe', ' ', 'restaurant', 'bar', 'meal_delivery', 'food'],
+    ['convenience_store', 'grocery_or_supermarket', 'store', 'shopping_mall'],
     ['casino', 'liquor_store', 'night_club']
   ],
   default_location: [-37.80544, 144.98331], // collingwood
@@ -100,6 +100,7 @@ var Lunch = {
 
   // geolocation is set!
   geoCallback: function (pos) {
+    console.log('geoCallback', pos);
     onionLayer.call('map', function () {
       var location = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
       Lunch.setLocation(location);
@@ -120,7 +121,7 @@ var Lunch = {
         region: 'au' // prefer Australia for now
       }, function (results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
-          Lunch.setLocation(results[0].geometry.location);
+          Lunch.setLocation(results[0].geometry.location, true);
         }
       });
     });
@@ -128,16 +129,18 @@ var Lunch = {
 
   // update location and map
   // REQUIRES map
-  setLocation: function (latLng) {
+  setLocation: function (latLng, clearExisting) {
     onionLayer.assertReady('map');
     Lunch.isReady('location');
 
-    Lunch.locationPlaces = {}; // reset distance map
+    if (clearExisting) {
+      Lunch.locationPlaces = {}; // reset distance map
+    }
     Lunch.location = latLng;
     Lunch.mapUpdate();
 
     if (Lunch.locationMarker === undefined) {
-      Lunch.locationMarker = new google.maps.Marker({ 
+      Lunch.locationMarker = new google.maps.Marker({
         map: Lunch.map,
         title: 'My Location',
         icon: 'http://labs.google.com/ridefinder/images/mm_20_blue.png',
@@ -160,34 +163,38 @@ var Lunch = {
     Lunch.pinTimeout = 0;
     var service = new google.maps.places.PlacesService(Lunch.map);
 
-    // service.nearbySearch({
-    //   location: Lunch.location,
-    //   // radius: 750,
-    //   keyword: query,
-    //   rankBy: google.maps.places.RankBy.DISTANCE,
-    //   types: Lunch.place_types[0]
-    // }, Lunch.placesLoadHander);
-
-    // service.nearbySearch({
-    //   location: Lunch.location,
-    //   radius: 750,
-    //   keyword: query,
-    //   rankBy: google.maps.places.RankBy.PROMINENCE,
-    //   types: Lunch.place_types[0]
-    // }, Lunch.placesLoadHander);
-
-    service.nearbySearch(a= {
+    service.nearbySearch({
       location: Lunch.location,
-      // radius: 50000,
+      // radius: 750,
       keyword: query,
       rankBy: google.maps.places.RankBy.DISTANCE,
       types: Lunch.place_types[0]
-    }, Lunch.placesLoadHander);
-    console.log(a);
+    }, Lunch.placesLoadHandler);
+
+    service.nearbySearch({
+      location: Lunch.location,
+      radius: 750,
+      keyword: query,
+      rankBy: google.maps.places.RankBy.PROMINENCE,
+      types: Lunch.place_types[0]
+    }, Lunch.placesLoadHandler);
+
+    // implement a promise for the above, on complete:
+    Lunch.zoomToLocationPlaces();
+    setTimeout(UI.placesListUpdate, 450);
+
+    // service.nearbySearch(a= {
+    //   location: Lunch.location,
+    //   // radius: 50000,
+    //   keyword: query,
+    //   rankBy: google.maps.places.RankBy.DISTANCE,
+    //   types: Lunch.place_types[0] // ['other']
+    // }, Lunch.placesLoadHandler);
+    // console.log(a); // returns INVALID_REQUEST
   },
 
   // handles a google place search reply
-  placesLoadHander: function (results, status) {
+  placesLoadHandler: function (results, status) {
     onionLayer.isReady('places'); 
     var marker, exists, place;
 
@@ -214,9 +221,6 @@ var Lunch = {
 
       Lunch.markers.push(Lunch.addPlaceToMap(place));
     }
-
-    Lunch.zoomToLocationPlaces();
-    setTimeout(UI.placesListUpdate, 450);
   },
 
   placeExists: function (place) {
@@ -279,13 +283,14 @@ var Lunch = {
     for (placeIndex in Lunch.locationPlaces) {
       bounds.extend(Lunch.places[placeIndex].geometry.location);
     }
-    if (bounds)
+    if (bounds && Lunch.locationPlaces.length > 1)
       Lunch.map.fitBounds(bounds);
   },
 
   // shows an info bubble for a particlar map
   showPlaceInfo: function (place, infoWindowOptions) {
-    Lunch.showInfo.call({ place: place }, { latLng: place.geometry.location }, infoWindowOptions);
+    Lunch.showInfo.call({ place: place, skipZoom: true }, { latLng: place.geometry.location }, infoWindowOptions);
+    Lunch.directionsTo(place);
   },
 
   // show an info bubble, event handler for marker.click
@@ -308,10 +313,12 @@ var Lunch = {
     zoomBounds.extend(place.geometry.location);
     // zoomBounds.extend({ lat: Lunch.location.lat(), lng: Lunch.location.lng() });
 
-    Lunch.infoWindow.setContent(html);
-    Lunch.infoWindow.setPosition(pos.latLng);
-    Lunch.map.fitBounds(zoomBounds);
-    Lunch.infoWindow.open(Lunch.map);
+    if (!this.skipZoom) {
+      Lunch.infoWindow.setContent(html);
+      Lunch.infoWindow.setPosition(pos.latLng);
+      Lunch.infoWindow.open(Lunch.map);
+      // Lunch.map.fitBounds(zoomBounds);
+    }
   },
 
   // hides an existing infobubble
@@ -319,6 +326,37 @@ var Lunch = {
   hideInfo: function () {
     if (Lunch.infoWindow !== undefined)
       Lunch.infoWindow.close();
+  },
+
+  directionsDisplay: undefined,
+  directionsTo: function (place) {
+    onionLayer.assertReady('map');
+
+    if (Lunch.directionsDisplay !== undefined) {
+      Lunch.directionsDisplay.setMap(null);
+      Lunch.directionsDisplay = null;
+    }
+
+    var directionsOptions = {
+      hideRouteList: true,
+      map: Lunch.map,
+      markerOptions: {
+        visible: false
+      }
+    };
+    Lunch.directionsDisplay = new google.maps.DirectionsRenderer(directionsOptions);
+    Lunch.directionsDisplay.setMap(Lunch.map);
+
+    var service = new google.maps.DirectionsService(Lunch.map);
+    service.route({
+      origin: Lunch.location,
+      destination: place.geometry.location,
+      travelMode: google.maps.TravelMode.WALKING
+    }, function (result, status) {
+      if (status == google.maps.DirectionsStatus.OK) {
+        Lunch.directionsDisplay.setDirections(result);
+      }
+    });
   },
 
   // return random place near location
@@ -332,6 +370,7 @@ var Lunch = {
                result = prop;
         return result;
     }
+
 
     var index = pickRandomProperty(Lunch.locationPlaces);
     if (index !== undefined)
@@ -394,14 +433,14 @@ var Lunch = {
     endpoint: 'http://www.chillidonut.com/junk/lunch/places-bump.php', // CORS proxy
 
     init: function() {
-      $('#map-area').on('click', '.bump-place', function () {
+      $('#map-area').on('click', '.js-bump-place', function () {
         var $this = $(this),
             $icon = $this.find('i'),
             index = $this.parents('.place-info').data('index'),
             place = Lunch.places[index];
 
         if (!index) return console.error('No index on placeInfo element');
-        $icon.removeClass('btn-info').addClass('icon-refresh');
+        $icon.removeClass('btn-warning').addClass('icon-refresh');
         Tracking.track('placeAdd', 'Init', place.reference)
 
         $.ajax({
@@ -493,6 +532,7 @@ var UI = {
     onionLayer.call('places', Lunch.search.init);
 
     onionLayer.call('map', Lunch.placeBump.init);
+    $('#map-area').on('click', '.js-inspect-place', UI.inspectPlace);
 
     // manual-location
     $('#manual-location input').on('keypress', function (ev) {
@@ -510,6 +550,16 @@ var UI = {
       $('.'+ type +'NotReady').remove();
       $('.'+ type +'Ready').fadeIn();
     });
+  },
+
+  // inspection report
+  inspectPlace: function () {
+    var $this = $(this),
+        $icon = $this.find('i'),
+        index = $this.parents('.place-info').data('index'),
+        place = Lunch.places[index];
+
+    console.log('place #'+ index, place);
   },
 
   // 
@@ -564,13 +614,7 @@ var UI = {
 
     suggestion.html(Templates.lunchSuggestion(place));
     if (place) {
-      // zoom to bounds
-      var bounds = new google.maps.LatLngBounds();
-      bounds.extend(Lunch.location);
-      bounds.extend(place.geometry.location);
-      Lunch.map.fitBounds(bounds);
-
-      Lunch.showPlaceInfo(place, { disableAutoPan: true });
+      Lunch.showPlaceInfo(place);
     }
   }
 }

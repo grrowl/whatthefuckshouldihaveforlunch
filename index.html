@@ -36,7 +36,7 @@
           <a><i class="icon-map-marker"></i></a>
         </li>
       </ul>
-      <h1>what the fuck should I have for lunch?</h1>
+      <h1><a class="btn btn-large btn-link">what the fuck should I have for lunch?</a></h1>
     </div>
 
     <hr class="pre-map">
@@ -85,7 +85,7 @@
         <h4>Why?</h4>
         <p>
           I'm sick of having to decide for myself what I'm going to get at work, or 
-          when I'm away for a lunch meeting. This solves the problem.
+          when I'm out and about. This solves the problem.
         </p>
       </div>
 
@@ -130,9 +130,14 @@
       {{#if opening_hours.open_now}}
         <p>Open now!</p>
       {{/if}}
-      <a class="bump-place btn btn-small btn-info pull-right">
-        <i class="icon-heart icon-white"></i> I love this place!
-      </a>
+      <div class="btn-group pull-right">
+        <a class="js-inspect-place btn btn-small">
+          <i class="icon-cog"></i> Not right?
+        </a>
+        <a class="js-bump-place btn btn-small btn-warning">
+          <i class="icon-heart icon-white"></i> I love this place!
+        </a>
+      </div>
     </div>
   </script>
   <script id="placeList-template" type="text/x-handlebars-template">
