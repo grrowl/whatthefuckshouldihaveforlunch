@@ -170,13 +170,12 @@ hr.post-map {
 }
 
 @media (max-width: 740px) {
-  body { background-color: #FF0000 ;}
   #map-search {
     left: 50px;
     width: 300px;
   }
   #map-search-input {
-    width: 298px;
+    width: 286px;
   }
 
   .container-narrow > hr {
@@ -186,24 +185,26 @@ hr.post-map {
     display: none;
   }
 
+  #map-area {}
+
   #manual-location input {
     width: 70%;
   }
   #manual-location p {
-    font-size: 17px;
+    font-size: 16px;
+    margin-bottom: 5px;
   }
 }
 @media (max-width: 550px) {
-  body { background-color: #00FF00 ;}
   #map-search {
     left: 30px;
     width: 200px;
   }
   #map-search-input {
-    width: 198px;
+    width: 186px;
   }
   .masthead ul {
-    display: none;
+    /*display: none;*/
   }
 
   .container-narrow > hr {
@@ -211,6 +212,10 @@ hr.post-map {
   }
   hr.post-map {
     display: none;
+  }
+
+  #map-area {
+    height: 400px;
   }
 
   #manual-location input {
