@@ -178,10 +178,8 @@ var Lunch = {
       types: Lunch.place_types[0]
     }, Lunch.placesLoadHandler);
 
-    // implement a promise for the above, on complete:
-    Lunch.zoomToLocationPlaces();
-    setTimeout(UI.placesListUpdate, 450);
-
+    // todo: implement a promise for the above, on complete do zoomTo/placesListUpdate
+    
     // service.nearbySearch(a= {
     //   location: Lunch.location,
     //   // radius: 50000,
@@ -220,6 +218,9 @@ var Lunch = {
 
       Lunch.markers.push(Lunch.addPlaceToMap(place));
     }
+
+    Lunch.zoomToLocationPlaces();
+    setTimeout(UI.placesListUpdate, 450);
   },
 
   placeExists: function (place) {

@@ -49,10 +49,15 @@ h1 a {
 #manual-location .btn {
   font-size: 21px;
   padding: 14px 24px;
+  line-height: 20px;
 }
-#manual-location input.btn-large {
+#manual-location input {
   text-align: left;
   vertical-align: top;
+  width: 530px;
+}
+#manual-location .btn-group {
+  width: 100% !important;
 }
 
 /* Supporting marketing content */
@@ -79,7 +84,7 @@ hr.post-map {
   /*background-image: url('//maps.googleapis.com/maps/api/staticmap?center=48%20Cambridge%20Street,VIC&zoom=15&size=700x490&key=AIzaSyDoVtyEit3VbYDASovkqGHiNeFxbNQlY3I&sensor=false');*/
 }
 #map-area img {
-    max-width: none;
+  max-width: none;
 }
 #map-canvas {
   position: absolute;
@@ -92,7 +97,7 @@ hr.post-map {
 #map-search {
   position: absolute;
   top: 0px;
-  left: 150px;
+  left: 125px;
   width: 400px;
   background-color: white;
   background-color: rgba(255, 255, 255, 0.7);
@@ -162,4 +167,56 @@ hr.post-map {
   max-width: 60px;
   float: left;
   margin: 4px 12px 0 0;
+}
+
+@media (max-width: 740px) {
+  body { background-color: #FF0000 ;}
+  #map-search {
+    left: 50px;
+    width: 300px;
+  }
+  #map-search-input {
+    width: 298px;
+  }
+
+  .container-narrow > hr {
+    margin: 15px 0;
+  }
+  hr.pre-map {
+    display: none;
+  }
+
+  #manual-location input {
+    width: 70%;
+  }
+  #manual-location p {
+    font-size: 17px;
+  }
+}
+@media (max-width: 550px) {
+  body { background-color: #00FF00 ;}
+  #map-search {
+    left: 30px;
+    width: 200px;
+  }
+  #map-search-input {
+    width: 198px;
+  }
+  .masthead ul {
+    display: none;
+  }
+
+  .container-narrow > hr {
+    margin: 5px 0;
+  }
+  hr.post-map {
+    display: none;
+  }
+
+  #manual-location input {
+    width: 60%;
+  }
+  #manual-location p {
+    display: none;
+  }
 }
