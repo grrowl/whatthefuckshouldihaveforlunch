@@ -204,7 +204,7 @@ hr.post-map {
     width: 186px;
   }
   .masthead ul {
-    /*display: none;*/
+    display: none;
   }
 
   .container-narrow > hr {
@@ -223,5 +223,13 @@ hr.post-map {
   }
   #manual-location p {
     display: none;
+  }
+}
+@media (max-width: 340px) {
+  #manual-location .btn {
+    padding: 14px 16px;
+  }
+  #manual-location input {
+    width: 44%;
   }
 }
