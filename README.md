@@ -1,13 +1,14 @@
 # what the fuck should i have for lunch?
 solving the age-old question with maps and science
 
-## final todos
-1. add some 'inspect' functionality so we can track down why Huxtaburger isn't appearing (i think it may fall outside our place_types[0] selection)
+## time to go on a diet (todos)
+1. migrate styling to SCSS, bootstrap3
+1. refactor UI to be mobile-first
+1. move from google places API to urbanspoon? or both?
+1. set up analytics tracking throughout
+1. add 'favourite place not appearing?' (email feedback)
+  * (i think it may fall outside our place_types[0] selection)
   * mailto: inspect@whatthefuckshouldihaveforlunch.com?subject=Lunch Inspect&content={place: ""}
-1. display walking directions to place.
-1. launch for god's sake
-1. tweak footer text: include 'favourite place not appearing?' and usage info
-1. set up tracking throughout
 
 ## app layout
 - **Lunch**: core app functionality
