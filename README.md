@@ -2,8 +2,9 @@
 solving the age-old question with maps and science
 
 ## time to go on a diet (todos)
+1. ~~refactor file structure, get shit together~~
 1. migrate styling to SCSS, bootstrap3
-1. refactor UI to be mobile-first
+1. remove places list, simplify overall "look and feel", refactor UI to be mobile-first
 1. move from google places API to urbanspoon? or both?
 1. set up analytics tracking throughout
 1. add 'favourite place not appearing?' (email feedback)
