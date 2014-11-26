@@ -1,6 +1,9 @@
 # what the fuck should i have for lunch?
 solving the age-old question with maps and science
 
+## Update (26-11-2014) - Development ceased
+Google Places has changed their API, so we get *far* less results than we used to (we should use Urbanspoon/Yelp instead), the original frontend isn't effectively responsive, and I don't have time to refactor/relaunch this fun experiment. **This project is hereby released into the public domain** for any use. Drop me a line if you do something cool with it!
+
 ## time to go on a diet (todos)
 1. ~~refactor file structure, get shit together~~
 1. migrate styling to SCSS, bootstrap3
